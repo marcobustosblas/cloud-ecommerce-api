@@ -6,7 +6,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/cloud_ecommerce_db
     username: postgres
     password: 123
-    driver-class-name: org.hibernate.dialect.PostgreSQLDialect
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:

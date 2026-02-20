@@ -1,0 +1,24 @@
+@startuml
+title Domain Model - cloud-ecommerce-api (v0.1)
+caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-02-20
+
+package "Domain Layer" {
+
+    class Product {
+        +UUID id
+        +String sku
+        +String name
+        +String description
+        +BigDecimal price
+        +Integer stock
+        +String imageUrl
+    }
+
+    class Category {
+        +UUID id
+        +String name
+    }
+
+    Product --> Category : belongs-to
+}
+@enduml
