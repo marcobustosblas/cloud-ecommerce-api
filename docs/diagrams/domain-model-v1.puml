@@ -1,6 +1,6 @@
 @startuml
 title Domain Model - cloud-ecommerce-api (v0.1)
-caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-02-20
+caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-02-23
 
 package "Domain Layer" {
 
@@ -10,8 +10,8 @@ package "Domain Layer" {
         +String name
         +String description
         +BigDecimal price
-        +Integer stock
         +String imageUrl
+        +Boolean active
     }
 
     class Category {
@@ -19,6 +19,14 @@ package "Domain Layer" {
         +String name
     }
 
-    Product --> Category : belongs-to
+    class Inventory {
+        +UUID id
+        +Integer quantity
+        +Integer reservedQuantity
+        +Boolean active
+    }
+
+    Category "1" o-- "*" Product : contains
+    Product "1" o-- "1" Inventory : tracks-stock
 }
 @enduml
