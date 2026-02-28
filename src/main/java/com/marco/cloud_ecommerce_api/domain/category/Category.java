@@ -1,4 +1,4 @@
-package com.marco.cloud_ecommerce_api.domain.model;
+package com.marco.cloud_ecommerce_api.domain.category;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
