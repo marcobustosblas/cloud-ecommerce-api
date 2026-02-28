@@ -1,0 +1,56 @@
+@startuml
+title Domain Model - cloud-ecommerce-api (v0.2)
+caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-02-23
+
+package "Domain Layer" {
+
+    enum ProductStatus {
+        DRAFT
+        ACTIVE
+        DEACTIVATED
+    }
+
+    class Product {
+        -UUID id
+        -String sku
+        -String name
+        -String description
+        -BigDecimal price
+        -String imageUrl
+        -ProductStatus status
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+        ---
+        +void activate()
+        +void deactivate()
+        +void updatePrice(BigDecimal newPrice)
+        +void reserveStock(int amount)
+        +void confirmOrder(int amount)
+    }
+
+    class Category {
+        -UUID id
+        -String name
+        -boolean active
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+        ---
+        +void rename(String newName)
+        +void activate()
+        +void deactivate()
+    }
+
+    class Inventory {
+        -UUID id
+        -int quantity
+        -int reservedQuantity
+        -LocalDateTime lastUpdated
+        ---
+        ~void reserveStock(int amount)
+        ~void confirmReservation(int amount)
+    }
+
+    Category "1" o-- "*" Product : contains
+    Product "1" *-- "1" Inventory : tracks-stock
+}
+@enduml
