@@ -24,16 +24,19 @@ package "Domain Layer" {
         - LocalDateTime createdAt
         - LocalDateTime updatedAt
         ---
-        + void activate()
-        + void deactivate()
-        + void updatePrice(BigDecimal newPrice)
         + void updateBasicInfo(String name, String description)
+        + void updatePrice(BigDecimal newPrice)
         + void changeCategory(UUID newCategoryId)
         + void updateImageUrl(String imageUrl)
+
+        + void activate()
+        + void deactivate()
+
         + void restock(int amount)
         + void reserveStock(int amount)
         + void confirmOrder(int amount)
         + void releaseReservation(int amount)
+
         + int getAvailableStock()
         + boolean hasStock(int requested)
     }
