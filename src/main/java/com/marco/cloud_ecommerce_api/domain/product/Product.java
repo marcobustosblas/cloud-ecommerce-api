@@ -13,7 +13,7 @@ public class Product {
     private String description;
     private BigDecimal price;
     private String imageURL;
-    private Category category;
+    private UUID categoryId; // reference to Category aggregate
     private Inventory inventory;
     private ProductStatus status;
     private LocalDateTime createdAt;
@@ -21,7 +21,10 @@ public class Product {
 
     protected Product() {}
 
-    public Product(String sku, String name, String description, BigDecimal price, String imageURL, Category category, int initialQuantity) {
+    public Product(
+            String sku, String name, String description, BigDecimal price,
+            String imageURL, UUID categoryId, int initialQuantity
+    ) {
         // 1. Identidad
         this.id = UUID.randomUUID();
 
@@ -29,11 +32,11 @@ public class Product {
         if (sku == null || sku.isBlank())
             throw new IllegalArgumentException("Sku cannot be null or blank");
         if (name == null || name.isBlank())
-            throw new IllegalStateException("Name cannot be null or blank");
+            throw new IllegalArgumentException("Name cannot be null or blank");
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException("Price must be greater than zero");
-        if (category == null)
-            throw new IllegalArgumentException("Category cannot be null");
+        if (categoryId == null)
+            throw new IllegalArgumentException("CategoryId cannot be null");
         if (initialQuantity < 0)
             throw new IllegalArgumentException("Initial quantity cannot be negative");
 
@@ -43,7 +46,7 @@ public class Product {
         this.description = description;
         this.price = price;
         this.imageURL = imageURL;
-        this.category = category;
+        this.categoryId = categoryId;
 
         // 4. Estado inicial y Composición
         this.status = ProductStatus.DRAFT;
@@ -52,6 +55,67 @@ public class Product {
         // 5. Auditoría
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+    }
+
+    // 1 METHODS
+    // 1.1Business Methods
+
+    // 1.1.1 Configuración (fase DRAFT)
+
+    public void updateBasicInfo(String name, String description) {
+        if (this.status != ProductStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Cannot be modify product basic info. Product must be in DRAFT state. " +
+                    "Current state: " + this.status
+            );
+        }
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("Description cannot be null");
+        }
+        this.name = name;
+        this.description = description;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updatePrice(BigDecimal newPrice) {
+        if (this.status != ProductStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Cannot modify product price. Product must be in DRAFT state. " +
+                    "Current state: " + this.status
+            );
+        }
+        if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
+        this.price = newPrice;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void changeCategory(UUID newCategoryId) {
+        if (this.status != ProductStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Cannot change product category. Product must be in DRAFT state. " +
+                    "Current state: " + this.status
+            );
+        }
+        if (newCategoryId == null) {
+            throw new IllegalArgumentException("CategoryId cannot be null");
+        }
+        this.categoryId = newCategoryId;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        if (this.status == ProductStatus.DEACTIVATED) {
+            throw new IllegalStateException(
+                    "Cannot update image of deactivated product"
+            );
+        }
+        this.imageURL = imageUrl;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void activate() {
@@ -66,7 +130,7 @@ public class Product {
             throw new IllegalStateException("Product name must not be blank to activate");
         if (this.description == null || this.description.isBlank())
             throw new IllegalStateException("Product description must not be blank to activate");
-        if (category == null) 
+        if (categoryId == null)
             throw new IllegalStateException("Product must have a category");
         // 3. State transition
         this.status = ProductStatus.ACTIVE;
