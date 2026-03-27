@@ -54,7 +54,6 @@ public class Inventory {
         if (amount <= 0) throw new IllegalArgumentException("Reservation amount must be positive");
         if (getAvailableQuantity() < amount) throw new IllegalStateException("Insufficient stock. Available: " + getAvailableQuantity() + ", Requested: " + amount);
         this.reservedQuantity += amount;
-        checkInvariants();
         this.lastUpdated = LocalDateTime.now();
     }
 
@@ -83,10 +82,10 @@ public class Inventory {
     }
 
     void clearAllReservations() {
-        if (this.reservedQuantity == 0) return;
-        this.reservedQuantity = 0;
-        checkInvariants();
-        this.lastUpdated = LocalDateTime.now();
+        if (this.reservedQuantity > 0) {
+            this.reservedQuantity = 0;
+            this.lastUpdated = LocalDateTime.now();
+        }
     }
 
     // --- QUERIES ---
@@ -96,11 +95,7 @@ public class Inventory {
     }
 
     public boolean hasAvailableStock(int requested) {
-        if (requested <= 0) {
-            throw new IllegalArgumentException("Requested amount must be positive");
-            // incluso en queries debo proteger mi dominio.
-        }
-        return getAvailableQuantity() >= requested;
+        return requested > 0 && getAvailableQuantity() >= requested;
     }
 
     private void checkInvariants() { // EL GUARDIÁN
