@@ -118,6 +118,8 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // 1.1.2 Transiciones de estado (State Transitions)
+
     public void activate() {
         // 1. Transition guard
         if (this.status != ProductStatus.DRAFT) {
@@ -136,5 +138,18 @@ public class Product {
         this.status = ProductStatus.ACTIVE;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void deactivate() {
+        if (this.status != ProductStatus.ACTIVE) {
+            throw new IllegalStateException("Only ACTIVE products can be deactivated");
+        }
+        if (this.inventory.getReservedQuantity() > 0) {
+            throw new IllegalStateException("Cannot deactivate product with active reservations");
+        }
+        this.status = ProductStatus.DEACTIVATED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+
 
 }
