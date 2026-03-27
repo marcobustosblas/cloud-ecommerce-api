@@ -1,24 +1,192 @@
 @startuml
-title Domain Model - cloud-ecommerce-api (v0.1)
-caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-02-20
+title Domain Model - cloud-ecommerce-api (v0.5 - FINAL)
+caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-03-25
+caption Modelo definitivo con aggregates por ID, User→Cart por ID, y deuda técnica documentada
 
 package "Domain Layer" {
 
+    enum ProductStatus {
+        DRAFT
+        ACTIVE
+        DEACTIVATED
+    }
+
     class Product {
-        +UUID id
-        +String sku
-        +String name
-        +String description
-        +BigDecimal price
-        +Integer stock
-        +String imageUrl
+        - UUID id
+        - String sku
+        - String name
+        - String description
+        - BigDecimal price  // TODO: Replace with Money Value Object
+        - UUID categoryId
+        - String imageUrl
+        - ProductStatus status
+        - Inventory inventory
+        - LocalDateTime createdAt
+        - LocalDateTime updatedAt
+        ---
+        + void updateBasicInfo(String name, String description)
+        + void updatePrice(BigDecimal newPrice)
+        + void changeCategory(UUID newCategoryId)
+        + void updateImageUrl(String imageUrl)
+
+        + void activate()
+        + void deactivate()
+
+        + void restock(int amount)
+        + void reserveStock(int amount)
+        + void confirmOrder(int amount)
+        + void releaseReservation(int amount)
+
+        + int getAvailableStock()
+        + boolean hasStock(int requested)
     }
 
     class Category {
-        +UUID id
-        +String name
+        - UUID id
+        - String name
+        - boolean active
+        - LocalDateTime createdAt
+        - LocalDateTime updatedAt
+        ---
+        + void rename(String newName)
+        + void activate()
+        + void deactivate()
     }
 
-    Product --> Category : belongs-to
+    class Inventory {
+        - UUID id
+        - int quantity
+        - int reservedQuantity
+        - LocalDateTime lastUpdated
+        - Long version  // Optimistic locking
+        ---
+        ~ void restock(int amount)
+        ~ void reserveStock(int amount)
+        ~ void confirmReservation(int amount)
+        ~ void releaseReservation(int amount)
+        ~ void clearAllReservations()
+        + int getAvailableQuantity()
+        + boolean hasAvailableStock(int requested)
+        --
+        Invariantes:
+        - quantity >= 0
+        - reservedQuantity >= 0
+        - reservedQuantity <= quantity
+        --
+        Validaciones en métodos:
+        - reserveStock: reserved + amount <= quantity
+        - confirmReservation: amount <= reservedQuantity
+        - releaseReservation: amount <= reservedQuantity
+    }
+
+    enum OrderStatus {
+        PENDING
+        PAID
+        SHIPPED
+        DELIVERED
+        CANCELLED
+    }
+
+    class Order {
+        - UUID id
+        - UUID userId
+        - List<OrderItem> items
+        - OrderStatus status
+        - LocalDateTime createdAt
+        - String idempotentKey
+        - Long version
+        ---
+        + void confirm()
+        + void pay()
+        + void cancel()
+        + void addItem(OrderItem item)
+        + BigDecimal getTotal()  // TODO: Return Money
+        + boolean canBePaid()
+        + boolean canBeCancelled()
+    }
+
+    class OrderItem {
+        - UUID productId
+        - String productName
+        - int quantity
+        - BigDecimal unitPrice  // TODO: Replace with Money
+        ---
+        + BigDecimal getSubtotal()  // TODO: Return Money
+    }
+
+    class Cart {
+        - UUID id
+        - UUID userId
+        - List<CartItem> items
+        ---
+        + void addItem(CartItem item)
+        + void removeItem(UUID productId)
+        + void updateQuantity(UUID productId, int quantity)
+        + void clear()
+        + BigDecimal getTotal()  // TODO: Return Money
+        + boolean isEmpty()
+        --
+        Nota: Este aggregate se persiste en Redis, no en JPA
+    }
+
+    class CartItem {
+        - UUID productId
+        - String productName
+        - int quantity
+        - BigDecimal unitPrice  // TODO: Replace with Money
+        ---
+        + BigDecimal getSubtotal()  // TODO: Return Money
+    }
+
+    enum Role {
+        ADMIN
+        CUSTOMER
+    }
+
+    class User {
+        - UUID id
+        - String email
+        - String passwordHash
+        - Set<Role> roles
+        - UUID cartId  // Relación por ID (el carrito vive en Redis)
+        - List<UUID> orderIds  // Relación por IDs
+        - LocalDateTime createdAt
+        - LocalDateTime updatedAt
+        ---
+        + void changeEmail(String newEmail)
+        + void changePassword(String newPasswordHash)
+        + void addRole(Role role)
+        + void removeRole(Role role)
+        + void setCartId(UUID cartId)
+        + void addOrderId(UUID orderId)
+    }
+
+    ' Relaciones (DEFINITIVAS)
+    Category "1" -- "*" Product : categorized by (via categoryId)
+    Product "1" *-- "1" Inventory : composition
+    User "1" -- "1" Cart : owns (via cartId)
+    User "1" -- "*" Order : places (via orderIds)
+    Order "1" *-- "*" OrderItem : composition
+    Cart "1" *-- "*" CartItem : composition
+
+    note right of Product
+        // TODO: Replace BigDecimal price with Money
+        // TODO: Add currency support
+    end note
+
+    note bottom of Cart
+        PERSISTENCIA: Redis
+        NO es JPA
+        TTL configurable
+    end note
+
+    note bottom of Order
+        IDEMPOTENCIA: idempotentKey con unique constraint
+        CONCURRENCIA: version para optimistic locking
+    end note
+
+    note right of Inventory
+        // TODO: Add event sourcing for stock movements (opcional)
+    end note
 }
 @enduml
