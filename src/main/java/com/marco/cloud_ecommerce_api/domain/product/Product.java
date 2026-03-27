@@ -180,4 +180,16 @@ public class Product {
         }
     }
 
+    // 1.1.4 Query methods
+
+    public int getAvailableStock() {
+        return this.inventory.getAvailableQuantity();
+    }
+
+    public boolean hasStock(int requested) {
+        return this.inventory.hasAvailableStock(requested);
+    }
+
+
+
 }
