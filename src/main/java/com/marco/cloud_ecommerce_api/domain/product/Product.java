@@ -1,7 +1,5 @@
 package com.marco.cloud_ecommerce_api.domain.product;
 
-import com.marco.cloud_ecommerce_api.domain.category.Category;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -150,6 +148,36 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // 1.1.3 Operaciones de negocio (inventory)
 
+    public void restock(int amount) {
+        ensureActivate();
+        this.inventory.restock(amount);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void reserveStock(int amount) {
+        ensureActivate();
+        this.inventory.reserveStock(amount);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void confirmOrder(int amount) {
+        ensureActivate();
+        this.inventory.confirmReservation(amount);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void releaseReservation(int amount) {
+        ensureActivate();
+        this.inventory.releaseReservation(amount);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void ensureActivate() {
+        if (this.status != ProductStatus.ACTIVE) {
+            throw new IllegalStateException("Operation allowed only for ACTIVE products");
+        }
+    }
 
 }
