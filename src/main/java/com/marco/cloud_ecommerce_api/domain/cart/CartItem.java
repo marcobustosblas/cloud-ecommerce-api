@@ -9,6 +9,8 @@ public class CartItem {
     private int quantity;
     private final BigDecimal unitPrice;
 
+    private static final int MAX_QUANTITY_PER_PRODUCT = 10;
+
     public CartItem(UUID productId, String productName, int quantity, BigDecimal unitPrice) {
         if (productId == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
@@ -19,7 +21,11 @@ public class CartItem {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than zero");
         }
-
+        if (quantity > MAX_QUANTITY_PER_PRODUCT) {
+            throw new IllegalArgumentException(
+                    "Quantity cannot exceed maximum of " + MAX_QUANTITY_PER_PRODUCT + " per product"
+            );
+        }
         if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Unit price must be greater than zero");
         }
@@ -33,12 +39,22 @@ public class CartItem {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount to add must be greater than zero");
         }
-        this.quantity += amount;
+        int newQuantity = this.quantity + amount;
+        if (newQuantity > MAX_QUANTITY_PER_PRODUCT) {
+            throw new IllegalStateException(
+                    "Cannot exceed maximum quantity of " + MAX_QUANTITY_PER_PRODUCT +
+                    " per product. Current: " + this.quantity + ", Requested: " + amount
+            );
+        }
+        this.quantity = newQuantity;
     }
 
     public void setQuantity(int newQuantity) {
         if (newQuantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+        if (newQuantity > MAX_QUANTITY_PER_PRODUCT) {
+            throw new IllegalStateException("Cannot set quantity greater than " + MAX_QUANTITY_PER_PRODUCT);
         }
         this.quantity = newQuantity;
     }
