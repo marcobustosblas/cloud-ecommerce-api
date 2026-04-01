@@ -1,5 +1,6 @@
 package com.marco.cloud_ecommerce_api.domain.cart;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +32,31 @@ public class Cart {
         this.id = id;
         this.userId = userId;
         this.items = new ArrayList<>(items);
+    }
+
+    public void addItem(UUID productId, String productName, int quantity, BigDecimal unitPrice) {
+        // Validaciones
+        if (productId == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+        if (productName == null || productName.isBlank()) {
+            throw new IllegalArgumentException("Product name cannot be null or blank");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Unit price must be greater than zero");
+        }
+
+        // Buscar si el producto ya existe en el carrito, en caso contrario agregarlo sabrosamente
+        items.stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst()
+                .ifPresentOrElse(
+                        item -> item.addQuantity(quantity),
+                        () -> items.add(new CartItem(productId, productName, quantity, unitPrice))
+                );
     }
 
     public UUID getId() {
