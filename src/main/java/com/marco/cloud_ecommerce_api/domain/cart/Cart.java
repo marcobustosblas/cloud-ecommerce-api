@@ -49,7 +49,7 @@ public class Cart {
             throw new IllegalArgumentException("Unit price must be greater than zero");
         }
 
-        // Buscar si el producto ya existe en el carrito, en caso contrario agregarlo sabrosamente
+        // Busco si el producto ya existe en el carrito, en caso contrario lo agrego sabrosamente
         items.stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst()
@@ -57,6 +57,33 @@ public class Cart {
                         item -> item.addQuantity(quantity),
                         () -> items.add(new CartItem(productId, productName, quantity, unitPrice))
                 );
+    }
+
+    public void removeItem(UUID productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+        items.removeIf(item -> item.getProductId().equals(productId));
+    }
+
+    public void updateQuantity(UUID productId, int quantity) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+        if (quantity <= 0) {
+            removeItem(productId);
+            return;
+        }
+        items.stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst()
+                .ifPresent(
+                        item -> item.setQuantity(quantity)
+                );
+    }
+
+    public void clear() {
+        items.clear();
     }
 
     public UUID getId() {
