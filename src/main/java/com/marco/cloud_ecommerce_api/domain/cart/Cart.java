@@ -103,7 +103,6 @@ public class Cart {
         return Collections.unmodifiableList(items);
     }
 
-
     public UUID getId() {
         return id;
     }
@@ -111,4 +110,17 @@ public class Cart {
     public UUID getUserId() {
         return userId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Cart cart)) return false;
+        return id != null && id.equals(cart.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+
 }
