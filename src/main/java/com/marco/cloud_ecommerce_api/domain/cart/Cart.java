@@ -2,6 +2,7 @@ package com.marco.cloud_ecommerce_api.domain.cart;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,6 +98,11 @@ public class Cart {
     public boolean isEmpty() {
         return items.isEmpty();
     }
+
+    public List<CartItem> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
 
     public UUID getId() {
         return id;
