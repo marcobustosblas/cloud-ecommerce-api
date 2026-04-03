@@ -119,14 +119,21 @@ package "Domain Layer" {
         - UUID userId
         - List<CartItem> items
         ---
-        + void addItem(CartItem item)
+        + void addItem(UUID productId, String productName, int quantity, BigDecimal unitPrice)
         + void removeItem(UUID productId)
         + void updateQuantity(UUID productId, int quantity)
         + void clear()
+        ---
         + BigDecimal getTotal()  // TODO: Return Money
         + boolean isEmpty()
+        + List<CartItem> getItems
+        ---
         --
-        Nota: Este aggregate se persiste en Redis, no en JPA
+        Nota: Aggregate Root
+        Se persiste en Redis (infraestructura)
+        Invariantes:
+         - Cantidad siempre > 0
+         - No items duplicados (se suman)
     }
 
     class CartItem {
@@ -136,6 +143,13 @@ package "Domain Layer" {
         - BigDecimal unitPrice  // TODO: Replace with Money
         ---
         + BigDecimal getSubtotal()  // TODO: Return Money
+        ---
+        --
+        Nota: Entity interna del aggregate Cart
+        No se accede directamente desde fuera
+        Invariantes:
+        - quantity > 0
+        - unitPrice > 0
     }
 
     enum Role {
