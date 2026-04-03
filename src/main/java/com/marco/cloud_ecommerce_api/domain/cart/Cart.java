@@ -86,6 +86,18 @@ public class Cart {
         items.clear();
     }
 
+    public BigDecimal getTotal() {
+        BigDecimal totalSum = BigDecimal.ZERO;
+        for (CartItem item: items) {
+            totalSum = totalSum.add(item.getSubtotal());
+        }
+        return totalSum;
+    }
+
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
     public UUID getId() {
         return id;
     }
