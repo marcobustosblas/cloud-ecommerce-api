@@ -29,7 +29,7 @@ public class OrderItem {
         this.unitPrice = unitPrice;
     }
 
-    public BigDecimal getSubTotal() {
+    public BigDecimal getSubtotal() {
         return this.unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
