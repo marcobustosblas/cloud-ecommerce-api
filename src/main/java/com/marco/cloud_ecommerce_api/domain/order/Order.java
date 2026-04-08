@@ -1,9 +1,8 @@
 package com.marco.cloud_ecommerce_api.domain.order;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Order {
     private final UUID id;
@@ -85,9 +84,43 @@ public class Order {
     public boolean canBePaid() {
         return this.status == OrderStatus.PENDING;
     }
-    
+
     public boolean canBeCancelled() {
         return this.status == OrderStatus.PENDING;
     }
+
+    public BigDecimal getTotal() {
+        return items.stream()
+                .map(OrderItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // ===== GETTERS =====
+
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public List<OrderItem> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getIdempotentKey() {
+        return idempotentKey;
+    }
+
+
 
 }
