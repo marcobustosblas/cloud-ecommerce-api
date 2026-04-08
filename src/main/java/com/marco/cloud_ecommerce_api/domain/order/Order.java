@@ -13,6 +13,8 @@ public class Order {
     private final LocalDateTime createdAt;
     private final String idempotentKey;
 
+    // ===== CONSTRUCTOR 1: BIRTH (nueva orden) =====
+
     public Order(UUID userId, List<OrderItem> items, String idempotentKey) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
@@ -30,6 +32,8 @@ public class Order {
         this.idempotentKey = idempotentKey;
         this.createdAt = LocalDateTime.now();
     }
+
+    // ===== CONSTRUCTOR 2: RECONSTRUCTION (desde BD) =====
 
     public Order(UUID id, UUID userId, OrderStatus status, List<OrderItem> items,
                  LocalDateTime createdAt, String idempotentKey) {
@@ -54,6 +58,36 @@ public class Order {
         this.items = new ArrayList<>(items);
         this.createdAt = createdAt;
         this.idempotentKey = idempotentKey;
+    }
+
+    // ===== STATE TRANSITIONS (COMMANDS) =====
+
+    public void pay() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only pending orders can be paid. Current status: " + this.status
+            );
+        }
+        this.status = OrderStatus.PAID;
+    }
+
+    public void cancel() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Order cannot be cancelled in its current state: " + this.status
+            );
+        }
+        this.status = OrderStatus.CANCELLED;
+    }
+
+    // ===== QUERIES =====
+
+    public boolean canBePaid() {
+        return this.status == OrderStatus.PENDING;
+    }
+    
+    public boolean canBeCancelled() {
+        return this.status == OrderStatus.PENDING;
     }
 
 }
