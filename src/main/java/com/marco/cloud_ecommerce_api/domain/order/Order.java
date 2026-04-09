@@ -73,7 +73,7 @@ public class Order {
     public void cancel() {
         if (this.status != OrderStatus.PENDING) {
             throw new IllegalStateException(
-                    "Order cannot be cancelled in its current state: " + this.status
+                    "Only pending orders can be cancelled. Current status: " + this.status
             );
         }
         this.status = OrderStatus.CANCELLED;
@@ -122,5 +122,28 @@ public class Order {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Order that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", status=" + status +
+                ", itemsCount=" + items.size() +
+                ", total=" + getTotal() +
+                ", idempotentKey='" + idempotentKey + '\'' +
+                '}';
+    }
 
 }
