@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,6 +56,59 @@ public class CartTest {
         cart.addItem(productId, "Zapatillas", 3, defaultPrice);
         cart.removeItem(productId);
         assertTrue(cart.isEmpty());
+    }
+
+    @Test
+    void shouldUpdateQuantity() {
+        cart.addItem(productId, "Zapatos", 2, defaultPrice);
+        cart.updateQuantity(productId, 5);
+
+        CartItem item = cart.getItems().getFirst();
+        assertEquals(5, item.getQuantity());
+        assertEquals(new BigDecimal("250.00"), cart.getTotal());
+        assertEquals(new BigDecimal("250.00"), item.getSubtotal());
+    }
+
+    @Test
+    void shouldRemoveItemWhenUpdateQuantityToZero() {
+        cart.addItem(productId, "Zapatos", 3, defaultPrice);
+        cart.updateQuantity(productId, 0);
+
+        assertTrue(cart.isEmpty());
+    }
+
+    @Test
+    void shouldClearCart() {
+        cart.addItem(productId, "Zapatillas", 2, defaultPrice);
+        UUID secondProduct = UUID.randomUUID();
+        cart.addItem(secondProduct, "Mochila", 3, new BigDecimal("30.00"));
+        cart.clear();
+
+        assertTrue(cart.isEmpty());
+        assertEquals(BigDecimal.ZERO, cart.getTotal());
+        assertEquals(0, cart.getItems().size());
+    }
+
+    @Test
+    void shouldReturnInmutableList() {
+        cart.addItem(productId, "Zapatillas", 3, defaultPrice);
+
+        List<CartItem> items = cart.getItems();
+
+        assertThrows(UnsupportedOperationException.class, ()->{
+            items.add(new CartItem(UUID.randomUUID(), "Colado", 3, BigDecimal.ONE));
+        });
+    }
+
+    @Test
+    void shouldBeEqualsById() {
+        UUID cartId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        Cart cart1 = new Cart(cartId, userId, new ArrayList<>());
+        Cart cart2 = new Cart(cartId, userId, new ArrayList<>());
+
+        assertEquals(cart1, cart2);
     }
 
 }
