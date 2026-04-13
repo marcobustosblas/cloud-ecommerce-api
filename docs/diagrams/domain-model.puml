@@ -1,7 +1,7 @@
 @startuml
-title Domain Model - cloud-ecommerce-api (v0.5 - FINAL)
-caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-03-25
-caption Modelo definitivo con aggregates por ID, User→Cart por ID, y deuda técnica documentada
+title Domain Model - cloud-ecommerce-api (v0.6 - CORREGIDO)
+caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-04-13
+caption Correcciones: User sin orderIds, agregado UserStatus, eliminado confirm() de Order
 
 package "Domain Layer" {
 
@@ -96,13 +96,12 @@ package "Domain Layer" {
         - String idempotentKey
         - Long version
         ---
-        + void confirm()
         + void pay()
         + void cancel()
-        + void addItem(OrderItem item)
         + BigDecimal getTotal()  // TODO: Return Money
         + boolean canBePaid()
         + boolean canBeCancelled()
+        + List<OrderItem> getItems()
     }
 
     class OrderItem {
@@ -142,6 +141,8 @@ package "Domain Layer" {
         - int quantity
         - BigDecimal unitPrice  // TODO: Replace with Money
         ---
+        + void addQuantity(int amount)
+        + void setQuantity(int newQuantity)
         + BigDecimal getSubtotal()  // TODO: Return Money
         ---
         --
@@ -157,13 +158,19 @@ package "Domain Layer" {
         CUSTOMER
     }
 
+    enum UserStatus {
+        ACTIVE
+        INACTIVE
+        BLOCKED
+    }
+
     class User {
         - UUID id
         - String email
         - String passwordHash
         - Set<Role> roles
-        - UUID cartId  // Relación por ID (el carrito vive en Redis)
-        - List<UUID> orderIds  // Relación por IDs
+        - UserStatus status
+        - UUID cartId  // Relación por ID (Carrito vive en Redis)
         - LocalDateTime createdAt
         - LocalDateTime updatedAt
         ---
@@ -171,17 +178,24 @@ package "Domain Layer" {
         + void changePassword(String newPasswordHash)
         + void addRole(Role role)
         + void removeRole(Role role)
+        + void activate()
+        + void deactivate()
+        + void block()
         + void setCartId(UUID cartId)
-        + void addOrderId(UUID orderId)
+        + void removeCartId()
+        + boolean isAdmin()
+        + boolean hasRole(Role role)
     }
 
-    ' Relaciones (DEFINITIVAS)
+    ' Relaciones (CORREGIDAS)
     Category "1" -- "*" Product : categorized by (via categoryId)
     Product "1" *-- "1" Inventory : composition
-    User "1" -- "1" Cart : owns (via cartId)
-    User "1" -- "*" Order : places (via orderIds)
+    User "1" -- "0..1" Cart : owns (via cartId)
     Order "1" *-- "*" OrderItem : composition
     Cart "1" *-- "*" CartItem : composition
+
+    '' NOTA: Order NO tiene relación directa en el diagrama con User
+    '' La relación es por userId (consulta inversa en repositorio)
 
     note right of Product
         // TODO: Replace BigDecimal price with Money
@@ -189,18 +203,19 @@ package "Domain Layer" {
     end note
 
     note bottom of Cart
-        PERSISTENCIA: Redis
-        NO es JPA
+        PERSISTENCIA: Redis (NO JPA)
         TTL configurable
     end note
 
     note bottom of Order
         IDEMPOTENCIA: idempotentKey con unique constraint
         CONCURRENCIA: version para optimistic locking
+        La relación con User es por userId (no se dibuja)
     end note
 
-    note right of Inventory
-        // TODO: Add event sourcing for stock movements (opcional)
+    note right of User
+        NOTA: User NO tiene lista de orderIds (evita problemas de rendimiento)
+        Para obtener órdenes: orderRepository.findByUserId(userId)
     end note
 }
 @enduml
