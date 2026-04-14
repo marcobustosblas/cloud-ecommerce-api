@@ -165,26 +165,55 @@ package "Domain Layer" {
     }
 
     class User {
+        ' === ATRIBUTOS ===
         - UUID id
         - String email
         - String passwordHash
         - Set<Role> roles
         - UserStatus status
-        - UUID cartId  // Relación por ID (Carrito vive en Redis)
+        - UUID cartId
         - LocalDateTime createdAt
         - LocalDateTime updatedAt
-        ---
+        --
+        ' === CONSTRUCTORES ===
+        + User(String email, String passwordHash)
+        + User(UUID id, String email, String passwordHash, Set<Role> roles, UserStatus status, UUID cartId, LocalDateTime createdAt, LocalDateTime updatedAt)
+        --
+        ' === VALIDACIONES PRIVADAS (no visibles en diagrama) ===
+        ' - setEmail(String email)
+        ' - setPasswordHash(String passwordHash)
+        --
+        ' === UPDATE METHODS ===
         + void changeEmail(String newEmail)
         + void changePassword(String newPasswordHash)
+        --
+        ' === ROLE MANAGEMENT ===
         + void addRole(Role role)
         + void removeRole(Role role)
+        + boolean hasRole(Role role)
+        + boolean isAdmin()
+        --
+        ' === STATUS MANAGEMENT ===
         + void activate()
         + void deactivate()
         + void block()
+        --
+        ' === CART MANAGEMENT ===
         + void setCartId(UUID cartId)
         + void removeCartId()
-        + boolean isAdmin()
-        + boolean hasRole(Role role)
+        --
+        ' === GETTERS ===
+        + UUID getId()
+        + String getEmail()
+        + Set<Role> getRoles()
+        + UserStatus getStatus()
+        + UUID getCartId()
+        + LocalDateTime getCreatedAt()
+        + LocalDateTime getUpdatedAt()
+        --
+        ' ===== EQUALS & HASHCODE =====
+        + boolean equals(Object o)
+        + int hashCode()
     }
 
     ' Relaciones (CORREGIDAS)
