@@ -11,19 +11,19 @@ public class User {
     private UserStatus status;
     private UUID cartId;
     private final LocalDateTime createdAt;
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
     // -- CONSTRUCTOR 1: BIRTH (nuevo usuario) --
     public User(String email, String passwordHash) {
         this.id = UUID.randomUUID();
-        this.email = email;
-        this.passwordHash = passwordHash;
+        setEmail(email);
+        setPasswordHash(passwordHash);
         this.roles = new HashSet<>();
         this.roles.add(Role.CUSTOMER);
         this.status = UserStatus.ACTIVE;
         this.cartId = null;
         this.createdAt = LocalDateTime.now();
-        this.updateAt = this.createdAt;
+        this.updatedAt = this.createdAt;
     }
 
     // --- CONSTRUCTOR 2: RECONSTRUCTION (desde BD) ---
@@ -44,19 +44,53 @@ public class User {
         this.status = status;
         this.cartId = cartId;
         this.createdAt = createdAt;
-        this.updateAt = updateAt;
+        this.updatedAt = updateAt;
     }
 
     // --- COMMANDS ---
 
     public void setCartId(UUID cartId) {
         this.cartId = cartId;
-        this.updateAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void removeCartId() {
         this.cartId = null;
-        this.updateAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // --- Validaciones del constructor ---
+
+    private void setEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be null or blank");
+        }
+        if (!email.contains("@") || !email.contains(".")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        this.email = email;
+    }
+
+    private void setPasswordHash(String passwordHash) {
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new IllegalArgumentException("Password hash cannot be null or blank");
+        }
+        if (passwordHash.length() <= 5) {
+            throw new IllegalArgumentException("Password must be at least 5 characters");
+        }
+        this.passwordHash = passwordHash;
+    }
+
+    // --- Update methods
+
+    public void changeEmail(String newEmail) {
+        setEmail(newEmail);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void changePassword(String newPasswordHash) {
+        setPasswordHash(newPasswordHash);
+        this.updatedAt = LocalDateTime.now();
     }
 
     // --- GETTERS ---
@@ -89,8 +123,8 @@ public class User {
         return createdAt;
     }
 
-    public LocalDateTime getUpdateAt() {
-        return updateAt;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
 }
