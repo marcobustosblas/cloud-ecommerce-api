@@ -96,8 +96,8 @@ public class User {
         if (role == null) {
             throw new IllegalArgumentException("Role cannot be null");
         }
-        if (role == Role.CUSTOMER && roles.size() == 1) {
-            throw new IllegalArgumentException("User must have at least one role. Cannot remove the last one.");
+        if (roles.size() <= 1) {
+            throw new IllegalStateException("User must have at least one role. Cannot remove the last one.");
         }
         if (roles.remove(role)) {
             this.updatedAt = LocalDateTime.now();
@@ -179,6 +179,20 @@ public class User {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    // --- IDENTITY
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(this.id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }
