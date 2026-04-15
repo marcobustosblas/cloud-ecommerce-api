@@ -47,18 +47,6 @@ public class User {
         this.updatedAt = updateAt;
     }
 
-    // --- COMMANDS ---
-
-    public void setCartId(UUID cartId) {
-        this.cartId = cartId;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void removeCartId() {
-        this.cartId = null;
-        this.updatedAt = LocalDateTime.now();
-    }
-
     // --- Validaciones del constructor ---
 
     private void setEmail(String email) {
@@ -81,7 +69,7 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    // --- Update methods
+    // --- UPDATE METHODS
 
     public void changeEmail(String newEmail) {
         setEmail(newEmail);
@@ -90,6 +78,72 @@ public class User {
 
     public void changePassword(String newPasswordHash) {
         setPasswordHash(newPasswordHash);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // --- ROLE MANAGEMENT
+
+    public void addRole(Role role) {
+        if (role == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
+        if (this.roles.add(role)) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    public void removeRole(Role role) {
+        if (role == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
+        if (role == Role.CUSTOMER && roles.size() == 1) {
+            throw new IllegalArgumentException("User must have at least one role. Cannot remove the last one.");
+        }
+        if (roles.remove(role)) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    public boolean hasRole(Role role) {
+        return this.roles.contains(role);
+    }
+
+    public boolean isAdmin() {
+        return hasRole(Role.ADMIN);
+    }
+
+    // --- STATUS MANAGEMENT
+
+    public void activate() {
+        if (this.status == UserStatus.BLOCKED) {
+            throw new IllegalStateException("Blocked users cannot be activated");
+        }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void deactivate() {
+        if (this.status == UserStatus.BLOCKED) {
+            throw new IllegalStateException("Blocked users cannot be deactivated");
+        }
+        this.status = UserStatus.INACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void block() {
+        this.status = UserStatus.BLOCKED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // --- CART MANAGEMENT, commands ---
+
+    public void setCartId(UUID cartId) {
+        this.cartId = cartId;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void removeCartId() {
+        this.cartId = null;
         this.updatedAt = LocalDateTime.now();
     }
 
