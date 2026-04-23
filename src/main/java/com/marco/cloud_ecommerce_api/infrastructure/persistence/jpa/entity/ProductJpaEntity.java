@@ -31,36 +31,49 @@ public class ProductJpaEntity {
     @Column(name = "image_url")
     private String imageURL;
 
-    @Column(name = "category_id", nullable = false)
-    private UUID categoryId; // reference to Category aggregate
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;
 
-    @Column(name = "create_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "update_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    // Relation con Category (DUEÑO)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryJpaEntity category;
+
+    // Relation con Inventory (INVERSO)
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private InventoryJpaEntity inventory;
+
     // Constructor vacío para JPA
-    protected ProductJpaEntity() {};
+    protected ProductJpaEntity() {}
 
     // Constructor para creación
     public ProductJpaEntity(String sku, String name, String description, BigDecimal price,
-                            String imageURL, UUID categoryId, ProductStatus status,
-                            LocalDateTime createdAt, LocalDateTime updatedAt) {
+                            String imageURL, ProductStatus status, CategoryJpaEntity category) {
         this.id = UUID.randomUUID();
         this.sku = sku;
         this.name = name;
         this.description = description;
         this.price = price;
         this.imageURL = imageURL;
-        this.categoryId = categoryId;
         this.status = status;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+        this.category = category;
+    }
+
+    // method helper sabroso
+    public void setInventory(InventoryJpaEntity inventory) {
+        this.inventory = inventory;
+        if (inventory != null) {
+            inventory.setProduct(this);
+        }
     }
 
     // Getters y Setters
@@ -112,14 +125,6 @@ public class ProductJpaEntity {
         this.imageURL = imageURL;
     }
 
-    public UUID getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(UUID categoryId) {
-        this.categoryId = categoryId;
-    }
-
     public ProductStatus getStatus() {
         return status;
     }
@@ -143,5 +148,10 @@ public class ProductJpaEntity {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public InventoryJpaEntity getInventory() { return inventory; }
+
+    public CategoryJpaEntity getCategory() { return category; }
+    public void setCategory(CategoryJpaEntity category) { this.category = category; }
 
 }
