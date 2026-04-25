@@ -3,6 +3,11 @@ package com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity;
 import com.marco.cloud_ecommerce_api.domain.product.Inventory;
 import com.marco.cloud_ecommerce_api.domain.product.ProductStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.SoftDeleteType;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,6 +15,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "products")
+@SoftDelete(columnName = "active", strategy = SoftDeleteType.ACTIVE)
+@EntityListeners(AuditingEntityListener.class)
 public class ProductJpaEntity {
 
     @Id
@@ -35,9 +42,17 @@ public class ProductJpaEntity {
     @Column(nullable = false)
     private ProductStatus status;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
+
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(name = "update_at", nullable = false)
     private LocalDateTime updatedAt;
 
@@ -46,8 +61,8 @@ public class ProductJpaEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryJpaEntity category;
 
-    // Relation con Inventory (INVERSO)
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    // Relation con Inventory (INVERSO - sin orphan)
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InventoryJpaEntity inventory;
 
     // Constructor vacío para JPA
@@ -63,9 +78,27 @@ public class ProductJpaEntity {
         this.price = price;
         this.imageURL = imageURL;
         this.status = status;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
         this.category = category;
+        this.active = true;
+    }
+
+    // soft delete methods (para control manual)
+    public void deactivate() {
+        this.active = true;
+        this.deactivatedAt = LocalDateTime.now();
+    }
+
+    public void activate() {
+        this.active = true;
+        this.deactivatedAt = null;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public boolean isDeactivated() {
+        return !active;
     }
 
     // method helper sabroso
@@ -76,82 +109,30 @@ public class ProductJpaEntity {
         }
     }
 
-    // Getters y Setters
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getImageURL() {
-        return imageURL;
-    }
-
-    public void setImageURL(String imageURL) {
-        this.imageURL = imageURL;
-    }
-
-    public ProductStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ProductStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public InventoryJpaEntity getInventory() { return inventory; }
-
+    // Getters
+    public UUID getId() { return id; }
+    public String getSku() { return sku; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public BigDecimal getPrice() { return price; }
+    public String getImageURL() { return imageURL; }
     public CategoryJpaEntity getCategory() { return category; }
+    public ProductStatus getStatus() { return status; }
+    public InventoryJpaEntity getInventory() { return inventory; }
+    public LocalDateTime getDeactivatedAt() { return deactivatedAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    // Setters
+    public void setId(UUID id) { this.id = id; }
+    public void setSku(String sku) { this.sku = sku; }
+    public void setName(String name) { this.name = name; }
+    public void setDescription(String description) { this.description = description; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public void setImageURL(String imageURL) { this.imageURL = imageURL; }
     public void setCategory(CategoryJpaEntity category) { this.category = category; }
+    public void setStatus(ProductStatus status) { this.status = status; }
+    public void setActive(boolean active) { this.active = active; }
+    public void setDeactivatedAt(LocalDateTime deactivatedAt) { this.deactivatedAt = deactivatedAt; }
 
 }
