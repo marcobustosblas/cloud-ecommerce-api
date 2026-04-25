@@ -61,9 +61,12 @@ public class ProductJpaEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryJpaEntity category;
 
-    // Relation con Inventory (INVERSO - sin orphan)
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private InventoryJpaEntity inventory;
+    // Relation con Inventory (INVERSO - sin orphan [false por defecto])
+    @OneToOne(
+            mappedBy = "product",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.LAZY
+    ) private InventoryJpaEntity inventory;
 
     // Constructor vacío para JPA
     protected ProductJpaEntity() {}
@@ -84,7 +87,7 @@ public class ProductJpaEntity {
 
     // soft delete methods (para control manual)
     public void deactivate() {
-        this.active = true;
+        this.active = false;
         this.deactivatedAt = LocalDateTime.now();
     }
 
