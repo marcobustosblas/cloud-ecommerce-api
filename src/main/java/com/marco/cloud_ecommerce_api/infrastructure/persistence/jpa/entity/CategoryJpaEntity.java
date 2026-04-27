@@ -41,6 +41,16 @@ public class CategoryJpaEntity {
         this.updatedAt = this.createdAt;
     }
 
+    // All-Args para Rehidratación
+    public CategoryJpaEntity(UUID id, String name, boolean active,
+                             LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     // Getters y Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

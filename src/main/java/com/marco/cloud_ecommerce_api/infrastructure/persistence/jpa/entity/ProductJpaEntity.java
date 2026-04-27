@@ -85,6 +85,24 @@ public class ProductJpaEntity {
         this.active = true;
     }
 
+    // All-Args Constructor para el Mapper (Rehidratación)
+    public ProductJpaEntity(UUID id, String sku, String name, String description,
+                            BigDecimal price, String imageURL, ProductStatus status,
+                            CategoryJpaEntity category, boolean active,
+                            LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.sku = sku;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.imageURL = imageURL;
+        this.status = status;
+        this.category = category;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     // soft delete methods (para control manual)
     public void deactivate() {
         this.active = false;

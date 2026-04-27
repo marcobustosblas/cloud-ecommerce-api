@@ -53,7 +53,7 @@ public class UserJpaEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "updated_at", nullable = false) // error visto en el name el 27-04
     private LocalDateTime updatedAt;
 
     public UserJpaEntity() {}
@@ -65,6 +65,21 @@ public class UserJpaEntity {
         this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
         this.status = status;
         this.active = true;
+    }
+
+    // All-Args para Rehidratación
+    public UserJpaEntity(UUID id, String email, String passwordHash, Set<Role> roles,
+                         UserStatus status, UUID cartId, boolean active,
+                         LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
+        this.status = status;
+        this.cartId = cartId;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // métodos de negocio para el ciclo de vida

@@ -38,6 +38,18 @@ public class InventoryJpaEntity {
         this.lastUpdated = lastUpdated;
     }
 
+    // All-Args para Rehidratación
+    // se añade la version para el bloqueo optimista y la relación con el product
+    public InventoryJpaEntity(UUID id, int quantity, int reserved_quantity,
+                              Long version, LocalDateTime lastUpdated, ProductJpaEntity product) {
+        this.id = id;
+        this.quantity = quantity;
+        this.reservedQuantity = reserved_quantity;
+        this.version = version;
+        this.lastUpdated = lastUpdated;
+        this.product = product;
+    }
+
     public UUID getId() {
         return id;
     }
