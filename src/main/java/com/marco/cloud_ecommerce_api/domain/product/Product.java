@@ -206,6 +206,10 @@ public class Product {
         return this.inventory.hasAvailableStock(requested);
     }
 
+    public boolean isActive() {
+        return this.status != ProductStatus.DEACTIVATED;
+    }
+
     // Getters
 
     public UUID getId() {

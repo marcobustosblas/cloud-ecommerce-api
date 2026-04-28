@@ -112,6 +112,10 @@ public class User {
         return hasRole(Role.ADMIN);
     }
 
+    public boolean isActive() {
+        return this.status == UserStatus.ACTIVE;
+    }
+
     // --- STATUS MANAGEMENT
 
     public void activate() {
