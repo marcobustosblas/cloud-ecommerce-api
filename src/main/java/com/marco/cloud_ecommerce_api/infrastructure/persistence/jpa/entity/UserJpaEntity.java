@@ -44,9 +44,8 @@ public class UserJpaEntity {
     @Column(name = "cart_id")
     private UUID cartId;
 
-    // Campo técnico para el soft delete
-    @Column(nullable = false)
-    private boolean active = true;
+    // ELIMINO EL CAMPO 'active' DE AQUÍ. Hibernate lo crea en la DB por el @SoftDelete.
+    // El campo 'active' me dio más problemas que la cresta
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -64,12 +63,11 @@ public class UserJpaEntity {
         this.passwordHash = passwordHash;
         this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
         this.status = status;
-        this.active = true;
     }
 
     // All-Args para Rehidratación
     public UserJpaEntity(UUID id, String email, String passwordHash, Set<Role> roles,
-                         UserStatus status, UUID cartId, boolean active,
+                         UserStatus status, UUID cartId,
                          LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.email = email;
@@ -77,19 +75,16 @@ public class UserJpaEntity {
         this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
         this.status = status;
         this.cartId = cartId;
-        this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
     // métodos de negocio para el ciclo de vida
     public void deactivate() {
-        this.active = false;
-        this.status = UserStatus.INACTIVE; // sincronizo con el estado de negocio
+        this.status = UserStatus.INACTIVE;
     }
 
     public void activate() {
-        this.active = true;
         this.status = UserStatus.ACTIVE;
     }
 
@@ -105,7 +100,6 @@ public class UserJpaEntity {
     public Set<Role> getRoles() { return roles; }
     public UserStatus getStatus() { return status; }
     public UUID getCartId() { return cartId; }
-    public boolean isActive() { return active; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
@@ -116,6 +110,5 @@ public class UserJpaEntity {
     public void setRoles(Set<Role> roles) { this.roles = roles; }
     public void setStatus(UserStatus status) { this.status = status; }
     public void setCartId(UUID cartId) { this.cartId = cartId; }
-    public void setActive(boolean active) { this.active = active; }
 
 }

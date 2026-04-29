@@ -28,7 +28,6 @@ public class UserMapper {
                 domain.getRoles(),
                 domain.getStatus(),
                 domain.getCartId(),
-                domain.isActive(),
                 domain.getCreatedAt(),
                 domain.getUpdatedAt()
         );

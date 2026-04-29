@@ -42,9 +42,6 @@ public class ProductJpaEntity {
     @Column(nullable = false)
     private ProductStatus status;
 
-    @Column(nullable = false)
-    private boolean active = true;
-
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
 
@@ -82,13 +79,12 @@ public class ProductJpaEntity {
         this.imageURL = imageURL;
         this.status = status;
         this.category = category;
-        this.active = true;
     }
 
     // All-Args Constructor para el Mapper (Rehidratación)
     public ProductJpaEntity(UUID id, String sku, String name, String description,
                             BigDecimal price, String imageURL, ProductStatus status,
-                            CategoryJpaEntity category, boolean active,
+                            CategoryJpaEntity category,
                             LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.sku = sku;
@@ -98,28 +94,19 @@ public class ProductJpaEntity {
         this.imageURL = imageURL;
         this.status = status;
         this.category = category;
-        this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
     // soft delete methods (para control manual)
     public void deactivate() {
-        this.active = false;
+        this.status = ProductStatus.DEACTIVATED;
         this.deactivatedAt = LocalDateTime.now();
     }
 
     public void activate() {
-        this.active = true;
+        this.status = ProductStatus.ACTIVE;
         this.deactivatedAt = null;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public boolean isDeactivated() {
-        return !active;
     }
 
     // method helper sabroso
@@ -153,7 +140,6 @@ public class ProductJpaEntity {
     public void setImageURL(String imageURL) { this.imageURL = imageURL; }
     public void setCategory(CategoryJpaEntity category) { this.category = category; }
     public void setStatus(ProductStatus status) { this.status = status; }
-    public void setActive(boolean active) { this.active = active; }
     public void setDeactivatedAt(LocalDateTime deactivatedAt) { this.deactivatedAt = deactivatedAt; }
 
 }

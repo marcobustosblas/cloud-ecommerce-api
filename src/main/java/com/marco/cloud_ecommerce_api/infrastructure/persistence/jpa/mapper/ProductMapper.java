@@ -35,7 +35,6 @@ public class ProductMapper {
                 domain.getImageURL(),
                 domain.getStatus(),
                 category,
-                domain.isActive(),
                 domain.getCreatedAt(),
                 domain.getUpdatedAt()
         );
