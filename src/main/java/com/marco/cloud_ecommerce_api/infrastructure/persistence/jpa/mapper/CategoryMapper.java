@@ -18,12 +18,13 @@ public class CategoryMapper {
     }
     public CategoryJpaEntity toJpaEntity(Category domain) {
         if (domain == null) return null;
-        return new CategoryJpaEntity(
-                domain.getId(),
-                domain.getName(),
-                domain.isActive(),
-                domain.getCreatedAt(),
-                domain.getUpdatedAt()
-        );
+
+        // Siempre crear nueva entidad SIN ID (JPA lo generará)
+        // Cuando recupo de BD, el mapper de toDomain usó el constructor all-args
+        // Pero para guardar, siempre uso el constructor simple
+        CategoryJpaEntity entity = new CategoryJpaEntity(domain.getName());
+        entity.setActive(domain.isActive());
+        // No setteo createdAt/updatedAt porque @PrePersist los maneja
+        return entity;
     }
 }

@@ -34,7 +34,7 @@ public class CategoryJpaEntity {
     public CategoryJpaEntity() {}
 
     public CategoryJpaEntity(String name) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID(); cambio importante
         this.name = name;
         this.active = true;
         this.createdAt = LocalDateTime.now();
