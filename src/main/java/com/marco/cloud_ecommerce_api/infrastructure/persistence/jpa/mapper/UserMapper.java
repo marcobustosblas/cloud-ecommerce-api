@@ -21,16 +21,15 @@ public class UserMapper {
     }
     public UserJpaEntity toJpaEntity(User domain) {
         if (domain == null) return null;
-        return new UserJpaEntity(
-                domain.getId(),
+        UserJpaEntity entity = new UserJpaEntity(
                 domain.getEmail(),
                 domain.getPasswordHash(),
                 domain.getRoles(),
-                domain.getStatus(),
-                domain.getCartId(),
-                domain.getCreatedAt(),
-                domain.getUpdatedAt()
+                domain.getStatus()
         );
+        entity.setCartId(domain.getCartId());
+        entity.setActive(domain.isActive());
+        return entity;
     }
 }
 

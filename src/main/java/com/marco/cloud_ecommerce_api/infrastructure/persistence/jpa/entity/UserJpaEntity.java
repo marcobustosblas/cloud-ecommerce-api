@@ -58,7 +58,7 @@ public class UserJpaEntity {
     public UserJpaEntity() {}
 
     public UserJpaEntity(String email, String passwordHash, Set<Role> roles, UserStatus status) {
-        this.id = UUID.randomUUID();
+        // this.id = UUID.randomUUID();
         this.email = email;
         this.passwordHash = passwordHash;
         this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
@@ -111,4 +111,7 @@ public class UserJpaEntity {
     public void setStatus(UserStatus status) { this.status = status; }
     public void setCartId(UUID cartId) { this.cartId = cartId; }
 
+    public void setActive(boolean active) {
+        if (active) activate(); else deactivate();
+    }
 }
