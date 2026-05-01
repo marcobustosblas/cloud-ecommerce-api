@@ -68,10 +68,10 @@ public class ProductJpaEntity {
     // Constructor vacío para JPA
     protected ProductJpaEntity() {}
 
-    // Constructor para creación
+    // Constructor para creación (lo ocupo para el toJpaEntity)
     public ProductJpaEntity(String sku, String name, String description, BigDecimal price,
                             String imageURL, ProductStatus status, CategoryJpaEntity category) {
-        this.id = UUID.randomUUID();
+        // this.id = UUID.randomUUID();
         this.sku = sku;
         this.name = name;
         this.description = description;
@@ -141,5 +141,13 @@ public class ProductJpaEntity {
     public void setCategory(CategoryJpaEntity category) { this.category = category; }
     public void setStatus(ProductStatus status) { this.status = status; }
     public void setDeactivatedAt(LocalDateTime deactivatedAt) { this.deactivatedAt = deactivatedAt; }
+
+    public void setActive(boolean active) {
+        if (active) {
+            this.activate();
+        } else {
+            this.deactivate();
+        }
+    }
 
 }

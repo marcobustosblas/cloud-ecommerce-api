@@ -26,18 +26,16 @@ public class ProductMapper {
     // Negocio -> DB
     public ProductJpaEntity toJpaEntity(Product domain, CategoryJpaEntity category) {
         if (domain == null) return null;
-        return new ProductJpaEntity(
-                domain.getId(),
+        ProductJpaEntity entity = new ProductJpaEntity(
                 domain.getSku(),
                 domain.getName(),
                 domain.getDescription(),
                 domain.getPrice(),
                 domain.getImageURL(),
                 domain.getStatus(),
-                category,
-                domain.getCreatedAt(),
-                domain.getUpdatedAt()
+                category
         );
+        entity.setActive(domain.isActive());
+        return entity;
     }
-
 }
