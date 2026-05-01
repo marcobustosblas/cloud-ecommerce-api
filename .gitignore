@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Notas personales y documentación local (NO se suben a Git)
+docs/notes/
+*.notes.md
+RELATIONS.md
+ERRORS.md

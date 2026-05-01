@@ -10,8 +10,8 @@ public class Product {
     private String name;
     private String description;
     private BigDecimal price;
-    private String imageURL;
     private UUID categoryId; // reference to Category aggregate
+    private String imageURL;
     private Inventory inventory;
     private ProductStatus status;
     private LocalDateTime createdAt;
@@ -21,7 +21,7 @@ public class Product {
 
     public Product(
             String sku, String name, String description, BigDecimal price,
-            String imageURL, UUID categoryId, int initialQuantity
+            UUID categoryId, String imageURL, int initialQuantity
     ) {
         // 1. Identidad
         this.id = UUID.randomUUID();
@@ -43,8 +43,8 @@ public class Product {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.imageURL = imageURL;
         this.categoryId = categoryId;
+        this.imageURL = imageURL;
 
         // 4. Estado inicial y Composición
         this.status = ProductStatus.DRAFT;
@@ -53,6 +53,22 @@ public class Product {
         // 5. Auditoría
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+    }
+
+    public Product(UUID id, String sku, String name, String description, BigDecimal price,
+                   UUID categoryId, String imageURL, ProductStatus status,
+                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.sku = sku;
+        this.name = name;
+        this.description = description;
+        this.categoryId = categoryId;
+        this.imageURL = imageURL;
+        this.price = price;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.inventory = null; // se asigna aparte si es necesario
     }
 
     // 1 METHODS
@@ -188,6 +204,10 @@ public class Product {
 
     public boolean hasStock(int requested) {
         return this.inventory.hasAvailableStock(requested);
+    }
+
+    public boolean isActive() {
+        return this.status != ProductStatus.DEACTIVATED;
     }
 
     // Getters

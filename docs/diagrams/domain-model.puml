@@ -1,5 +1,5 @@
 @startuml
-title Domain Model - cloud-ecommerce-api (v0.6 - CORREGIDO)
+title Domain Model - cloud-ecommerce-api (v0.7 - CORREGIDO)
 caption Autor: Marco Orlando Bustos Blas - Fecha: 2026-04-13
 caption Correcciones: User sin orderIds, agregado UserStatus, eliminado confirm() de Order
 
@@ -218,13 +218,27 @@ package "Domain Layer" {
 
     ' Relaciones (CORREGIDAS)
     Category "1" -- "*" Product : categorized by (via categoryId)
-    Product "1" *-- "1" Inventory : composition
+    Product "1" o-- "1" Inventory : aggregation
     User "1" -- "0..1" Cart : owns (via cartId)
     Order "1" *-- "*" OrderItem : composition
     Cart "1" *-- "*" CartItem : composition
 
-    '' NOTA: Order NO tiene relación directa en el diagrama con User
+    '' NOTAS
+
+    '' Order NO tiene relación directa en el diagrama con User
     '' La relación es por userId (consulta inversa en repositorio)
+
+    '' Changes realized at 24-04-26, 16:07 hrs
+
+    '' Aggregation is a "has-a" relationship with weak ownership, where parts exist independently of the whole (e.g., Car-Engine)
+    '' Composition is a "part-of" relationship with strong ownership, where the child’s lifecycle depends on the parent (e.g., House-Room).
+    '' Cambio Relación *-- → o-- en diagrama
+    '' La naturaleza de la relación cambia: Inventory ya no es "parte vital" de Product
+
+    '' Change *-- to o-- to reflect soft delete business rule
+    '' Inventory has historical value and should not be deleted with Product
+    '' Product uses status=DEACTIVATED for soft delete, not hard delete
+    '' This aligns with real-world business requirements
 
     note right of Product
         // TODO: Replace BigDecimal price with Money

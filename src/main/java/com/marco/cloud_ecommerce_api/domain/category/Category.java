@@ -21,7 +21,7 @@ public class Category {
         this.updatedAt = this.createdAt;
     }
 
-    // Constructor completo (útil para reconstrucción desde DB)
+    // Constructor RECONSTRUCTION (desde BD)
     public Category(UUID id, String name, boolean active,
                     LocalDateTime createdAt, LocalDateTime updatedAt) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");

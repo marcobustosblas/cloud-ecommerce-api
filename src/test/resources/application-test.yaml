@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # For testing, it's best to create and drop the schema after execution
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Esto silencia un poco los logs de Docker para no marearme
+logging:
+  level:
+    org.testcontainers: INFO
+    org.hibernate.SQL: DEBUG

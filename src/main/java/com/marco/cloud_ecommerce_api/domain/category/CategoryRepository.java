@@ -1,0 +1,14 @@
+package com.marco.cloud_ecommerce_api.domain.category;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface CategoryRepository {
+    Category save(Category category);
+    Optional<Category> findById(UUID id);
+    Optional<Category> findByName(String name);
+    List<Category> findAll();
+    void deleteById(UUID id);
+    boolean existsByName(String name);
+}
