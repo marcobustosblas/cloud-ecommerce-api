@@ -59,28 +59,41 @@ Orquesta la lógica:
 ---
 
 ## **3) Infrastructure Layer**
-Implementa detalles técnicos:
-- **persistence/**: Repositorios JPA
-- **web/**: REST Controllers
-- **config/**: Beans, JWT, seguridad
-- **cache/**: Redis
-- **aws/**: S3 client (futuro)
-- **messaging/**: Kafka/SQS producer
-- **db/**: Migraciones SQL, índices
+La infraestructura se organiza en subpaquetes según su responsabilidad:
+```
+infrastructure/
+├── persistence/
+│ └── jpa/
+│ ├── entity/ # JPA Entities (@Entity, @Table)
+│ ├── repository/ # Spring Data JPA Repositories
+│ ├── mapper/ # Conversores Domain ↔ JPA Entity
+│ └── adapter/ # Implementaciones de repositorios del dominio
+├── web/
+│ └── controller/ # REST Controllers (futuro)
+├── config/ # Beans, JWT, seguridad (futuro)
+├── cache/ # Redis (futuro)
+├── aws/ # S3 client (futuro)
+├── messaging/ # Kafka/SQS producer (futuro)
+└── db/ # Migraciones SQL (futuro)
+```
 
-**Características:**
-- Responsable de adaptadores externos.
-- Puede cambiar sin impactar el dominio.
+**Patrón implementado:** Repository Pattern + Adapter Pattern + Mapper Pattern
 
 ---
 
-# 3. Flujo de una Petición HTTP
-Cliente → Controller (Infrastructure)
-→ Caso de Uso (Application)
-→ Entidades (Domain)
-→ Repository Interface (Domain)
-→ JPA Repository (Infrastructure)
-→ PostgreSQL
+## 3. Flujo de una Petición HTTP (Completo)
+
+1. **Cliente** → Controller (infrastructure/web)
+2. **Controller** → Application Service (application)
+3. **Application Service** → Repository Interface (domain)
+4. **Repository Interface** ← implementada por → Repository Adapter (infrastructure/persistence/jpa/adapter)
+5. **Repository Adapter** → Mapper (convierte Domain → JPA Entity)
+6. **Mapper** → JPA Repository (infrastructure/persistence/jpa/repository)
+7. **JPA Repository** → Hibernate → PostgreSQL
+
+**Flujo de retorno (lectura):**
+
+PostgreSQL → Hibernate → JPA Repository → Mapper (convierte JPA Entity → Domain) → Repository Adapter → Application Service → Controller → Cliente
 
 ---
 
@@ -233,4 +246,17 @@ Este documento se actualizará con nuevas versiones conforme se agreguen módulo
 - Fácil despliegue
 - Preparado para auditorías de empresas cloud-native
 
+---
 
+## 12. Patrones de Diseño Implementados
+
+| **Patrón** | **Dónde se aplica** | **Propósito** |
+|-----------|---------------------|---------------|
+| **Aggregate Root** | Product, Order, User, Cart | Define límites de consistencia transaccional |
+| **Repository** | ProductRepository, UserRepository | Abstrae la capa de persistencia |
+| **Adapter** | ProductRepositoryAdapter | Adapta el puerto del dominio a la implementación JPA |
+| **Mapper** | ProductMapper, UserMapper | Convierte entre Domain y JPA Entity |
+| **Value Object** | Inventory, CartItem (como entidades internas) | Encapsula valores sin identidad propia |
+| **Soft Delete** | @SoftDelete en Product, User | Borrado lógico para conservar histórico |
+| **Idempotency** | idempotentKey en Order | Previene duplicados en operaciones críticas |
+| **Optimistic Locking** | @Version en Inventory, Order | Control de concurrencia sin bloqueos pesados |
