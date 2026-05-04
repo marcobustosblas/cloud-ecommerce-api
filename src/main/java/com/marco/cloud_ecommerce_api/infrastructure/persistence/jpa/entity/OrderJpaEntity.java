@@ -2,6 +2,8 @@ package com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity;
 
 import com.marco.cloud_ecommerce_api.domain.order.OrderStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -13,6 +15,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "orders")
 @EntityListeners(AuditingEntityListener.class)
+@Getter
 public class OrderJpaEntity {
 
     @Id
@@ -22,6 +25,7 @@ public class OrderJpaEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
@@ -57,14 +61,9 @@ public class OrderJpaEntity {
         this.createdAt = createdAt;
     }
 
-    public UUID getId() { return id; }
-    public UUID getUserId() { return userId; }
-    public OrderStatus getStatus() { return status; }
-    public String getIdempotentKey() { return idempotentKey; }
-    public Long getVersion() { return version; }
-    public List<OrderItemJpaEntity> getItems() { return items; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
-    public void setStatus(OrderStatus status) { this.status = status; }
+    public void addItem(OrderItemJpaEntity item) {
+        this.items.add(item);
+        item.setOrder(this);
+    }
 
 }
