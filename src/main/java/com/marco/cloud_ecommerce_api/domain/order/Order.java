@@ -11,6 +11,7 @@ public class Order {
     private final List<OrderItem> items;
     private final LocalDateTime createdAt;
     private final String idempotentKey;
+    private final Long version;
 
     // ===== CONSTRUCTOR 1: BIRTH (nueva orden) =====
 
@@ -30,12 +31,13 @@ public class Order {
         this.items = new ArrayList<>(items);
         this.idempotentKey = idempotentKey;
         this.createdAt = LocalDateTime.now();
+        this.version = null; // Las órdenes nuevas no tienen versión hasta que se guardan
     }
 
     // ===== CONSTRUCTOR 2: RECONSTRUCTION (desde BD) =====
 
     public Order(UUID id, UUID userId, OrderStatus status, List<OrderItem> items,
-                 LocalDateTime createdAt, String idempotentKey) {
+                 LocalDateTime createdAt, String idempotentKey, Long version) { // recibe version
         if (id == null) {
             throw new IllegalArgumentException("Order ID cannot be null");
         }
@@ -51,12 +53,16 @@ public class Order {
         if (createdAt == null) {
             throw new IllegalArgumentException("CreatedAt cannot be null");
         }
+        if (version == null) {
+            throw new IllegalArgumentException("Version is required for reconstructed orders");
+        }
         this.id = id;
         this.userId = userId;
         this.status = status;
         this.items = new ArrayList<>(items);
         this.createdAt = createdAt;
         this.idempotentKey = idempotentKey;
+        this.version = version;
     }
 
     // ===== STATE TRANSITIONS (COMMANDS) =====
@@ -121,6 +127,9 @@ public class Order {
         return idempotentKey;
     }
 
+    public Long getVersion() {
+        return version;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -138,12 +147,9 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "id=" + id +
-                ", userId=" + userId +
                 ", status=" + status +
-                ", itemsCount=" + items.size() +
+                ", version=" + version +
                 ", total=" + getTotal() +
-                ", idempotentKey='" + idempotentKey + '\'' +
                 '}';
     }
-
 }

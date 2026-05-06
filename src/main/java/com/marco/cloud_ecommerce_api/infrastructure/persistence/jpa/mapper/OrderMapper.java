@@ -29,17 +29,30 @@ public class OrderMapper {
                 entity.getStatus(),
                 domainItems,
                 entity.getCreatedAt(),
-                entity.getIdempotentKey()
+                entity.getIdempotentKey(),
+                entity.getVersion()
         );
     }
 
     public OrderJpaEntity toJpaEntity(Order domain) {
         if (domain == null) return null;
-        OrderJpaEntity entity = new OrderJpaEntity(
-                domain.getUserId(),
-                domain.getStatus(),
-                domain.getIdempotentKey()
-        );
+        OrderJpaEntity entity;
+        if (domain.getVersion() == null) {
+            entity = new OrderJpaEntity(
+                    domain.getUserId(),
+                    domain.getStatus(),
+                    domain.getIdempotentKey()
+            );
+        } else {
+            entity = new OrderJpaEntity(
+                    domain.getId(),
+                    domain.getUserId(),
+                    domain.getStatus(),
+                    domain.getIdempotentKey(),
+                    domain.getCreatedAt(),
+                    domain.getVersion()
+            );
+        }
         domain.getItems().stream().map(itemMapper::toJpaEntity).forEach(entity::addItem);
         return entity;
     }

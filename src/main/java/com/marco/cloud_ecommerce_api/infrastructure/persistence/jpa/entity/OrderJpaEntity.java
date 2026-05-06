@@ -34,6 +34,7 @@ public class OrderJpaEntity {
     private String idempotentKey;
 
     @Version
+    @Column(name = "version", nullable = false)
     private Long version;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,
@@ -53,12 +54,13 @@ public class OrderJpaEntity {
     }
 
     public OrderJpaEntity(UUID id, UUID userId, OrderStatus status,
-                          String idempotentKey, LocalDateTime createdAt) {
+                          String idempotentKey, LocalDateTime createdAt, Long version) {
         this.id = id;
         this.userId = userId;
         this.status = status;
         this.idempotentKey = idempotentKey;
         this.createdAt = createdAt;
+        this.version = version;
     }
 
     public void addItem(OrderItemJpaEntity item) {

@@ -31,7 +31,7 @@ public class OrderRepositoryAdapter implements OrderRepository {
 
     @Override
     public Optional<Order> findById(UUID id) {
-        String jpql = "SELECT DISTINCT o FROM OrderJpaEntity o LEFT JOIN FETCH o.items WHERE o.id=:id";
+        String jpql = "SELECT o FROM OrderJpaEntity o LEFT JOIN FETCH o.items WHERE o.id=:id";
         TypedQuery<OrderJpaEntity> query = entityManager.createQuery(jpql, OrderJpaEntity.class);
         query.setParameter("id", id);
         try {
