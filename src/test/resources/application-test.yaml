@@ -6,9 +6,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
 
 # Esto silencia un poco los logs de Docker para no marearme
 logging:
   level:
     org.testcontainers: INFO
     org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
