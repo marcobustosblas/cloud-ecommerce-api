@@ -64,7 +64,6 @@ public class ProductService {
     }
 
     /* Actualizar producto */
-    @Transactional(readOnly = true)
     public ProductResponseDTO updateProduct(UUID id, ProductRequestDTO request) {
         // 1. Buscar producto existente
         Product product = productRepository.findById(id)
