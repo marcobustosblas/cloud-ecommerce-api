@@ -18,7 +18,7 @@ public class UserDtoMapper {
      * Domain → ResponseDTO
      * Excluye passwordHash y cartId por seguridad
      */
-    public UserResponseDTO userResponseDTO(User user) {
+    public UserResponseDTO toResponseDTO(User user) {
         if (user == null) return null;
         return new UserResponseDTO(
                 user.getId(),
