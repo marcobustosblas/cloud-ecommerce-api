@@ -14,12 +14,11 @@ public class OrderDtoMapper {
     public Order toDomain(OrderRequestDTO request) {
         if (request == null) return null;
         // Convertir cada OrderItemRequestDTO a OrderItem (dominio)
+        // Uso el CONSTRUCTOR TEMPORAL (solo con productId y quantity)
         List<OrderItem> orderItems = request.getItems().stream()
                 .map(item -> new OrderItem(
                         item.getProductId(),
-                        "", // productName se asignará en el servicio (con consulta a BD)
-                        item.getQuantity(),
-                        BigDecimal.ZERO // unitPrice se asignará en el servicio
+                        item.getQuantity()
                 )).toList();
         return new Order(request.getUserId(), orderItems, request.getIdempotentKey());
     }
