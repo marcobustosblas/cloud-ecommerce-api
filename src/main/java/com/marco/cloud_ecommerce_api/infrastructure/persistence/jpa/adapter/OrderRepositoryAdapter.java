@@ -11,6 +11,7 @@ import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,6 +54,12 @@ public class OrderRepositoryAdapter implements OrderRepository {
         } catch (NoResultException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<Order> findByUserId(UUID userId) {
+        List<OrderJpaEntity> entities = jpaRepository.findByUserId(userId);
+        return entities.stream().map(mapper::toDomain).toList();
     }
 
 }
