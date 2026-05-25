@@ -74,7 +74,7 @@ public class OrderItem {
     // --- METHOD PARA "ENRIQUECER" UN ITEM TEMPORAL ---
     // Crea un NUEVO OrderItem (inmutable) con los datos completos
 
-    public OrderItem enrichWithProductDetails(String productName, BigDecimal unitPrice) {
+    public OrderItem assignProductDetails(String productName, BigDecimal unitPrice) {
         if (this.productName != null && this.unitPrice != null) {
             throw new IllegalStateException("OrderItem already enriched");
         }

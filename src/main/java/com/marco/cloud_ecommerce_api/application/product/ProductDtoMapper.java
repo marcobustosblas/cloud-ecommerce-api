@@ -19,7 +19,7 @@ public class ProductDtoMapper {
                 categoryName,
                 product.getImageURL(),
                 product.getStatus(),
-                product.getAvailableStock(),
+                product.getStock(),
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
