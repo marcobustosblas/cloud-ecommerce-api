@@ -10,6 +10,25 @@ public class OrderItem {
     private final int quantity;
     private final BigDecimal unitPrice;
 
+    // --- CONSTRUCTOR 1: TEMPORAL (para creación desde RequestDTO) ---
+    // Usado cuando el frontend envía la orden (solo tiene productId y quantity)
+
+    public OrderItem(UUID productId, int quantity) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+        this.productId = productId;
+        this.productName = null;
+        this.quantity = quantity;
+        this.unitPrice = null;
+    }
+
+
+    // --- CONSTRUCTOR 2: DEFINITIVO (para enriquecer con datos de BD) ---
+
     public OrderItem(UUID productId, String productName, int quantity, BigDecimal unitPrice) {
         if (productId == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
@@ -30,6 +49,9 @@ public class OrderItem {
     }
 
     public BigDecimal getSubtotal() {
+        if (unitPrice == null) {
+            throw new IllegalStateException("OrderItem not yet enriched with price");
+        }
         return this.unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
@@ -47,6 +69,16 @@ public class OrderItem {
 
     public BigDecimal getUnitPrice() {
         return unitPrice;
+    }
+
+    // --- METHOD PARA "ENRIQUECER" UN ITEM TEMPORAL ---
+    // Crea un NUEVO OrderItem (inmutable) con los datos completos
+
+    public OrderItem assignProductDetails(String productName, BigDecimal unitPrice) {
+        if (this.productName != null && this.unitPrice != null) {
+            throw new IllegalStateException("OrderItem already enriched");
+        }
+        return new OrderItem(this.productId, productName, this.quantity, unitPrice);
     }
 
     @Override

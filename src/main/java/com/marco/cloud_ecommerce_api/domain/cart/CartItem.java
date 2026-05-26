@@ -11,6 +11,26 @@ public class CartItem {
 
     private static final int MAX_QUANTITY_PER_PRODUCT = 10;
 
+    public CartItem(UUID productId, int quantity) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+        if (quantity > MAX_QUANTITY_PER_PRODUCT) {
+            throw new IllegalArgumentException(
+                    "Quantity cannot exceed maximum of " + MAX_QUANTITY_PER_PRODUCT + " per product"
+            );
+        }
+        this.productId = productId;
+        this.productName = null;
+        this.quantity = quantity;
+        this.unitPrice = null;
+        // El precio, nombre y subtotal se quedan en sus valores por defecto
+        // hasta que el servicio los busque en la base de datos de productos.
+    }
+
     public CartItem(UUID productId, String productName, int quantity, BigDecimal unitPrice) {
         if (productId == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
@@ -57,6 +77,14 @@ public class CartItem {
             throw new IllegalStateException("Cannot set quantity greater than " + MAX_QUANTITY_PER_PRODUCT);
         }
         this.quantity = newQuantity;
+    }
+
+    // Method para asignar atributos inmutables
+    public CartItem assignCartDetails(String productName, BigDecimal unitPrice) {
+        if (this.productName != null || this.unitPrice != null) {
+            throw new IllegalStateException("CartItem already enriched");
+        }
+        return new CartItem(this.productId, productName, this.quantity, unitPrice);
     }
 
     public BigDecimal getSubtotal() {

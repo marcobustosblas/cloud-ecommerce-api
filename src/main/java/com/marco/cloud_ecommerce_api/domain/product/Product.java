@@ -166,6 +166,7 @@ public class Product {
 
     // 1.1.3 Operaciones de negocio (inventory)
 
+    // METHOD PARA DEVOLVER STOCK
     public void restock(int amount) {
         ensureActivate();
         this.inventory.restock(amount);
@@ -190,6 +191,12 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // METHOD PARA REDUCIR STOCK (cuando se compra)
+    public void reduceStock(int quantity) {
+        this.inventory.reserveStock(quantity); // primero reservo
+        this.confirmOrder(quantity); // luego confirmo
+    }
+
     public void ensureActivate() {
         if (this.status != ProductStatus.ACTIVE) {
             throw new IllegalStateException("Operation allowed only for ACTIVE products");
@@ -198,7 +205,8 @@ public class Product {
 
     // 1.1.4 Query methods
 
-    public int getAvailableStock() {
+    // METHOD PARA OBTENER STOCK DISPONIBLE
+    public int getStock() {
         return this.inventory.getAvailableQuantity();
     }
 
