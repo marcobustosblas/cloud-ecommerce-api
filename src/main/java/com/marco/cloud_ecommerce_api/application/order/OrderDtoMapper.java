@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class OrderDtoMapper {
 
-    // RequestDTO → Domain (para crear una orden)
+    // RequestDTO -> Domain (para crear una orden)
     public Order toDomain(OrderRequestDTO request) {
         if (request == null) return null;
         // Convertir cada OrderItemRequestDTO a OrderItem (dominio)

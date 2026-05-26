@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Cart {
-    private final UUID id;
+    private final UUID cartId;
     private final UUID userId;
     private final List<CartItem> items;
 
@@ -15,13 +15,13 @@ public class Cart {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
         }
-        this.id = UUID.randomUUID();
+        this.cartId = UUID.randomUUID();
         this.userId = userId;
         this.items = new ArrayList<>();
     }
 
-    public Cart(UUID id, UUID userId, List<CartItem> items) {
-        if (id == null) {
+    public Cart(UUID cartId, UUID userId, List<CartItem> items) {
+        if (cartId == null) {
             throw new IllegalArgumentException("Cart ID cannot be null");
         }
         if (userId == null) {
@@ -30,7 +30,7 @@ public class Cart {
         if (items == null) {
             throw new IllegalArgumentException("Items cannot be null");
         }
-        this.id = id;
+        this.cartId = cartId;
         this.userId = userId;
         this.items = new ArrayList<>(items);
     }
@@ -104,7 +104,7 @@ public class Cart {
     }
 
     public UUID getId() {
-        return id;
+        return cartId;
     }
 
     public UUID getUserId() {
@@ -115,12 +115,12 @@ public class Cart {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Cart cart)) return false;
-        return id != null && id.equals(cart.id);
+        return cartId != null && cartId.equals(cart.cartId);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return cartId != null ? cartId.hashCode() : 0;
     }
 
 }
