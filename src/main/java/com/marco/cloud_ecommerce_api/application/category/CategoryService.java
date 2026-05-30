@@ -47,7 +47,7 @@ public class CategoryService {
     }
 
     /* Actualizar categoría */
-    public CategoryResponseDTO updateCategory(UUID id, CategoryResponseDTO request) {
+    public CategoryResponseDTO updateCategory(UUID id, CategoryRequestDTO request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Category not found: " + id));
         category.rename(request.getName());
