@@ -1,10 +1,15 @@
 package com.marco.cloud_ecommerce_api.infrastructure.api.controller;
 
+import com.marco.cloud_ecommerce_api.application.common.PageResponseDTO;
 import com.marco.cloud_ecommerce_api.application.product.ProductRequestDTO;
 import com.marco.cloud_ecommerce_api.application.product.ProductResponseDTO;
 import com.marco.cloud_ecommerce_api.application.product.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +25,11 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<ProductResponseDTO>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<PageResponseDTO<ProductResponseDTO>> findAll(
+            @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<ProductResponseDTO> page = productService.findAllPage(pageable);
+        PageResponseDTO<ProductResponseDTO> response = new PageResponseDTO<>(page);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

@@ -5,6 +5,8 @@ import com.marco.cloud_ecommerce_api.domain.category.CategoryRepository;
 import com.marco.cloud_ecommerce_api.domain.product.Product;
 import com.marco.cloud_ecommerce_api.domain.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +63,17 @@ public class ProductService {
                     Category category = categoryRepository.findById(product.getCategoryId()).orElse(null);
                     return productDtoMapper.toResponseDTO(product, category != null ? category.getName() : null);
                 }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDTO> findAllPage(Pageable pageable) {
+        return productRepository.findAllPage(pageable)
+                .map(product -> {
+                    String categoryName = categoryRepository.findById(product.getCategoryId())
+                            .map(Category::getName)
+                            .orElse(null);
+                    return productDtoMapper.toResponseDTO(product, categoryName);
+                });
     }
 
     /* Actualizar producto */

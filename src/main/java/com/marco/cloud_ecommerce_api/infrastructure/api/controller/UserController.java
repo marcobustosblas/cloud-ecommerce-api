@@ -72,13 +72,15 @@ public class UserController {
         return ResponseEntity.ok(userService.blockUser(id));
     }
 
+    // 15/6 22:43 hr Ambos tanto addRole & removeRole tienen la misma anotación "/{id}/roles"
+
     @PostMapping("/{id}/roles")
     public ResponseEntity<UserResponseDTO> addRole(
             @PathVariable UUID id, @RequestParam Role role) {
         return ResponseEntity.ok(userService.addRole(id, role));
     }
 
-    @PostMapping("/{id}/roles")
+    @DeleteMapping("/{id}/roles")
     public ResponseEntity<UserResponseDTO> removeRole(
             @PathVariable UUID id, @RequestParam Role role) {
         return ResponseEntity.ok(userService.removeRole(id, role));

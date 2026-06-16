@@ -9,6 +9,8 @@ import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.mapper.Produ
 import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.repository.CategoryJpaRepository;
 import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.repository.ProductJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -61,8 +63,13 @@ public class ProductRepositoryAdapter implements ProductRepository {
         jpaRepository.deleteById(id);
     }
 
+    @Override
     public boolean existsBySku(String sku) {
         return jpaRepository.existsBySku(sku);
     }
 
+    @Override
+    public Page<Product> findAllPage(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(mapper::toDomain);
+    }
 }
