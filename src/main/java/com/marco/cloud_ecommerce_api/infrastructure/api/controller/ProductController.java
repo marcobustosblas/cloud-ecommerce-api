@@ -1,6 +1,7 @@
 package com.marco.cloud_ecommerce_api.infrastructure.api.controller;
 
 import com.marco.cloud_ecommerce_api.application.common.PageResponseDTO;
+import com.marco.cloud_ecommerce_api.application.product.ProductFilterDTO;
 import com.marco.cloud_ecommerce_api.application.product.ProductRequestDTO;
 import com.marco.cloud_ecommerce_api.application.product.ProductResponseDTO;
 import com.marco.cloud_ecommerce_api.application.product.ProductService;
@@ -26,9 +27,15 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<PageResponseDTO<ProductResponseDTO>> findAll(
+            ProductFilterDTO filter, // Spring lee los parámetros de la URL (?search=...&minPrice=...) y llena este DTO
             @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<ProductResponseDTO> page = productService.findAllPage(pageable);
+
+        // Llamo al servicio que acabo de modificar
+        Page<ProductResponseDTO> page = productService.findAllFilteredPage(filter, pageable);
+
+        // Lo envuelvo en mi caja genérica limpia
         PageResponseDTO<ProductResponseDTO> response = new PageResponseDTO<>(page);
+
         return ResponseEntity.ok(response);
     }
 
