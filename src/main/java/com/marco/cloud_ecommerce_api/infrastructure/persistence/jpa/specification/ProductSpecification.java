@@ -4,6 +4,7 @@ import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity.Produ
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public class ProductSpecification {
@@ -52,7 +53,17 @@ public class ProductSpecification {
 
     public static Specification<ProductJpaEntity> filterByActiveStatus() {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.isTrue(root.get("active"));
+                criteriaBuilder.isTrue(root.get("active")
+        );
+    }
+
+    public static Specification<ProductJpaEntity> filterByCategoryIn(List<UUID> categoryIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (categoryIds == null || categoryIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("category").get("id").in(categoryIds);
+        };
     }
 
 }

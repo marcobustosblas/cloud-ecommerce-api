@@ -33,8 +33,8 @@ public class ProductController {
         // Llamo al servicio que acabo de modificar
         Page<ProductResponseDTO> page = productService.findAllFilteredPage(filter, pageable);
 
-        // Lo envuelvo en mi caja genérica limpia
-        PageResponseDTO<ProductResponseDTO> response = new PageResponseDTO<>(page);
+        // Devuelvo la página con los filtros aplicados (para que el cliente sepa qué buscó)
+        PageResponseDTO<ProductResponseDTO> response = new PageResponseDTO<>(page, filter);
 
         return ResponseEntity.ok(response);
     }

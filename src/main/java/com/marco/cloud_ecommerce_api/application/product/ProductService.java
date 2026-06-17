@@ -67,6 +67,7 @@ public class ProductService {
     public Page<ProductResponseDTO> findAllFilteredPage(ProductFilterDTO filter, Pageable pageable) {
         Specification<ProductJpaEntity> spec = ProductSpecification.filterByActiveStatus()
                 .and(ProductSpecification.filterByCategory(filter.getCategoryId()))
+                .and(ProductSpecification.filterByCategoryIn(filter.getCategoryIds()))
                 .and(ProductSpecification.filterByMinimumPrice(filter.getMinPrice()))
                 .and(ProductSpecification.filterByMaxPrice(filter.getMaxPrice()))
                 .and(ProductSpecification.filterBySearchText(filter.getSearch()));
