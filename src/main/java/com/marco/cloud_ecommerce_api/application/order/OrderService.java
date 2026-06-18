@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,7 +23,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final OrderDtoMapper dtoMapper;
+    private final OrderDtoMapper orderDtoMapper;
 
     // --- MÉTODOS DE LECTURA ---
 
@@ -30,20 +31,20 @@ public class OrderService {
     public OrderResponseDTO findById(UUID id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Order with id" + id + " not found"));
-        return dtoMapper.toResponseDTO(order);
+        return orderDtoMapper.toResponseDTO(order);
     }
 
     @Transactional(readOnly = true)
     public OrderResponseDTO findByIdempotentKey(String idempotentKey) {
         Order order = orderRepository.findByIdempotentKey(idempotentKey)
                 .orElseThrow(()-> new RuntimeException("Order with" + idempotentKey + " not found"));
-        return dtoMapper.toResponseDTO(order);
+        return orderDtoMapper.toResponseDTO(order);
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponseDTO> findByUserId(UUID userId) {
         return orderRepository.findByUserId(userId).stream()
-                .map(dtoMapper::toResponseDTO)
+                .map(orderDtoMapper::toResponseDTO)
                 .toList();
     }
 
@@ -66,14 +67,15 @@ public class OrderService {
     /* Crear una order sabrosa */
     public OrderResponseDTO createOrder(OrderRequestDTO request) {
         // 1. control de idempotencia
-        if (orderRepository.findByIdempotentKey(request.getIdempotentKey()).isPresent()) {
-            throw new RuntimeException("Order already processed with key: " + request.getIdempotentKey());
+        Optional<Order> existingOrder = orderRepository.findByIdempotentKey(request.getIdempotentKey());
+        if (existingOrder.isPresent()) {
+            return orderDtoMapper.toResponseDTO(existingOrder.get());
         }
         // 2. validar usuario
         userRepository.findById(request.getUserId())
                 .orElseThrow(()-> new RuntimeException("User not found: " + request.getIdempotentKey()));
         // 3. mapeo inicial con order-domain temporal con items completos
-        Order order = dtoMapper.toDomain(request);
+        Order order = orderDtoMapper.toDomain(request);
         // 4. validar y enriquecer cada item
         List<OrderItem> itemsEnriched = new ArrayList<>();
         for (OrderItem item : order.getItems()) {
@@ -96,7 +98,7 @@ public class OrderService {
         // Creo una NUEVA orden sabrosa con los items enriquecidos y gorditos
         Order enrichedOrder = new Order(order.getUserId(), itemsEnriched, order.getIdempotentKey());
         Order savedOrder = orderRepository.save(enrichedOrder);
-        return dtoMapper.toResponseDTO(savedOrder);
+        return orderDtoMapper.toResponseDTO(savedOrder);
     }
 
     /* Pagar una orden (cambia estado de PENDING a PAID) */
@@ -105,7 +107,7 @@ public class OrderService {
                 .orElseThrow(()-> new RuntimeException("Order with id: " + id + " not found!"));
         order.pay();
         Order saved = orderRepository.save(order);
-        return dtoMapper.toResponseDTO(saved);
+        return orderDtoMapper.toResponseDTO(saved);
     }
 
     /* Cancelar una orden y devolver el stock a los productos */
@@ -122,7 +124,7 @@ public class OrderService {
         }
         // Guardar la orden cancelada
         Order updatedOrder = orderRepository.save(order);
-        return dtoMapper.toResponseDTO(updatedOrder);
+        return orderDtoMapper.toResponseDTO(updatedOrder);
     }
 
 }

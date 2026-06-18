@@ -19,7 +19,7 @@ public class OrderRequestDTO {
     @NotEmpty(message = "Order must have at least one item")
     private List<OrderItemRequestDTO> items;
 
-    @NotBlank(message = "Idempotent key is required")
+    // Ya no es @NotBlank en el JSON. Se llena internamente desde el Header.
     private String idempotentKey;
 
 }

@@ -5,6 +5,7 @@ import com.marco.cloud_ecommerce_api.application.order.OrderResponseDTO;
 import com.marco.cloud_ecommerce_api.application.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +22,15 @@ public class OrderController {
     // -- commands (Escritura)
 
     @PostMapping("/create")
-    public ResponseEntity<OrderResponseDTO> create(@Valid @RequestBody OrderRequestDTO order) {
-        return ResponseEntity.ok(orderService.createOrder(order));
+    public ResponseEntity<OrderResponseDTO> create(
+            @Valid @RequestBody OrderRequestDTO request,
+            @RequestHeader(value = "Idempotent-Key", required = true) String idempotentKey
+            ) {
+        // Atrapo la clave del Header de forma segura y se la inyecto al DTO
+        request.setIdempotentKey(idempotentKey);
+
+        OrderResponseDTO created = orderService.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{id}/pay")
