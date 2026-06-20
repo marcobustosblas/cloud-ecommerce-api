@@ -4,7 +4,12 @@ import com.marco.cloud_ecommerce_api.domain.category.Category;
 import com.marco.cloud_ecommerce_api.domain.category.CategoryRepository;
 import com.marco.cloud_ecommerce_api.domain.product.Product;
 import com.marco.cloud_ecommerce_api.domain.product.ProductRepository;
+import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity.ProductJpaEntity;
+import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,14 +58,29 @@ public class ProductService {
         return productDtoMapper.toResponseDTO(product, category != null ? category.getName(): null);
     }
 
-    /* Listar todos los productos activos */
+    /**
+     * Listar productos con filtros dinámicos y paginación.
+     * Los filtros son opcionales (si vienen null, se ignoran).
+     * Solo devuelve productos activos (soft delete = false).
+     */
     @Transactional(readOnly = true)
-    public List<ProductResponseDTO> findAll() {
-        return productRepository.findAll().stream()
+    public Page<ProductResponseDTO> findAllFilteredPage(ProductFilterDTO filter, Pageable pageable) {
+        Specification<ProductJpaEntity> spec = ProductSpecification.filterByActiveStatus()
+                .and(ProductSpecification.filterByCategory(filter.getCategoryId()))
+                .and(ProductSpecification.filterByCategoryIn(filter.getCategoryIds()))
+                .and(ProductSpecification.filterByMinimumPrice(filter.getMinPrice()))
+                .and(ProductSpecification.filterByMaxPrice(filter.getMaxPrice()))
+                .and(ProductSpecification.filterBySearchText(filter.getSearch()));
+
+        // 2. Llamo al adaptador usando el nuevo method que acabo de programar
+        return productRepository.findAllFilteredPage(spec, pageable)
                 .map(product -> {
-                    Category category = categoryRepository.findById(product.getCategoryId()).orElse(null);
-                    return productDtoMapper.toResponseDTO(product, category != null ? category.getName() : null);
-                }).toList();
+                    // Busco el nombre de la categoría para el DTO de respuesta
+                    String categoryName = categoryRepository.findById(product.getCategoryId())
+                            .map(Category::getName)
+                            .orElse(null);
+                    return productDtoMapper.toResponseDTO(product, categoryName);
+                });
     }
 
     /* Actualizar producto */

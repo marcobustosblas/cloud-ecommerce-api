@@ -207,6 +207,10 @@ public class Product {
 
     // METHOD PARA OBTENER STOCK DISPONIBLE
     public int getStock() {
+        if (this.inventory == null) {
+            return 0; // Si no hay objeto inventario, el stock es 0 de forma segura
+            // ASÍ PROTEJO el modelo de dominio contra NullPointerException y soluciono el bug final de la w13
+        }
         return this.inventory.getAvailableQuantity();
     }
 
