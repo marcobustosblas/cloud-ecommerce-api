@@ -66,7 +66,7 @@ public class ProductJpaEntity {
     ) private InventoryJpaEntity inventory;
 
     // Constructor vacío para JPA
-    protected ProductJpaEntity() {}
+    public ProductJpaEntity() {}
 
     // Constructor para creación (lo ocupo para el toJpaEntity)
     public ProductJpaEntity(String sku, String name, String description, BigDecimal price,

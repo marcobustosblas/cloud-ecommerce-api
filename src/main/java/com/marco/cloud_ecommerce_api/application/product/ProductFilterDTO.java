@@ -1,6 +1,7 @@
 package com.marco.cloud_ecommerce_api.application.product;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@NoArgsConstructor  // <- GENERA CONSTRUCTOR SIN NADA
 public class ProductFilterDTO {
     private UUID categoryId;
     private List<UUID> categoryIds;

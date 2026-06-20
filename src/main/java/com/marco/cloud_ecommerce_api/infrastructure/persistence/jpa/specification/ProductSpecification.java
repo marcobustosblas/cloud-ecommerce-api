@@ -1,5 +1,6 @@
 package com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.specification;
 
+import com.marco.cloud_ecommerce_api.domain.product.ProductStatus;
 import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity.ProductJpaEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -53,8 +54,7 @@ public class ProductSpecification {
 
     public static Specification<ProductJpaEntity> filterByActiveStatus() {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.isTrue(root.get("active")
-        );
+                criteriaBuilder.equal(root.get("status"), ProductStatus.ACTIVE);
     }
 
     public static Specification<ProductJpaEntity> filterByCategoryIn(List<UUID> categoryIds) {
