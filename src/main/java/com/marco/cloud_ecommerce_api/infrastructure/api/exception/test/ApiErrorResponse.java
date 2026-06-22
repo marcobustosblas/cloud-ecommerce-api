@@ -1,4 +1,4 @@
-package com.marco.cloud_ecommerce_api.infrastructure.api.exception;
+package com.marco.cloud_ecommerce_api.infrastructure.api.exception.test;
 
 import java.time.LocalDateTime;
 import java.util.Map;
