@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     // 1, errores inesperados (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
-        log.error("Error crítico del sistema");
+        log.error("Error crítico del sistema", ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado en el servidor.", request, null);
     }
 
