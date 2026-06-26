@@ -39,7 +39,7 @@ public class ProductControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // 🌟 Inicializamos MockMvc manualmente inyectando el resolvedor de Pageable de Spring Data
+        // Inicializo MockMvc manualmente inyectando el resolvedor de Pageable de Spring Data
         // Esto soluciona CUALQUIER error 400 relacionado con parámetros de paginación en los tests
         this.mockMvc = MockMvcBuilders.standaloneSetup(productController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
