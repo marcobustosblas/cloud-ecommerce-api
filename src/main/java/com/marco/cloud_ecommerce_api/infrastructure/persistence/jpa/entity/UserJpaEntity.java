@@ -9,8 +9,12 @@ import org.hibernate.annotations.SoftDeleteType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -19,7 +23,7 @@ import java.util.UUID;
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 @SoftDelete(columnName = "active", strategy = SoftDeleteType.ACTIVE)
-public class UserJpaEntity {
+public class UserJpaEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -91,6 +95,51 @@ public class UserJpaEntity {
     // method helper para agregar rol
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    // MÉTODOS DE UserDetails (Spring Security)
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .toList();
+    }
+
+    @Override
+    public String getPassword() {
+        return this.passwordHash;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+        // mi email actúa como el username único de inicio de sesión
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+        // No manejo expiración de cuenta todavía
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+        // No manejo bloqueo de cuenta todavía
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+        // No manejo expiración de credenciales
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.status == UserStatus.ACTIVE;
+        // Un usuario está habilitado si su estado es ACTIVE
+        // Con @SoftDelete, Hibernate filtra automáticamente los eliminados
     }
 
     // Getters
