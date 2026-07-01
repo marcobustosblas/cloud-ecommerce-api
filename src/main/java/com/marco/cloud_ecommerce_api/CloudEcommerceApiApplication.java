@@ -17,19 +17,4 @@ public class CloudEcommerceApiApplication {
 		SpringApplication.run(CloudEcommerceApiApplication.class, args);
 	}
 
-	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.csrf(AbstractHttpConfigurer::disable) // Desactiva la protección CSRF para poder hacer POST/PUT luego
-				.authorizeHttpRequests(auth -> auth
-						.anyRequest().permitAll() // ¡Deja pasar a todos sin exigir token!
-				);
-		return http.build();
-	}
-
 }

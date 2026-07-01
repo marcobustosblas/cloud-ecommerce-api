@@ -5,7 +5,7 @@ import com.marco.cloud_ecommerce_api.domain.user.Role;
 import com.marco.cloud_ecommerce_api.domain.user.User;
 import com.marco.cloud_ecommerce_api.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
-    private final BCryptPasswordEncoder passwordEncoder; // Solo para hashear
+    private final PasswordEncoder passwordEncoder; // Solo para hashear
 
     // --- MÉTODOS DE LECTURA ---
 
