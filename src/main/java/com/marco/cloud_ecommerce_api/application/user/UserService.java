@@ -19,7 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
-    private final PasswordEncoder passwordEncoder; // Solo para hashear
+    private final PasswordEncoder passwordEncoder; // La interfaz de SecurityConfig
 
     // --- MÉTODOS DE LECTURA ---
 
