@@ -111,6 +111,54 @@ available = quantity - reservedQuantity
 
 ---
 
+## Inventory Loading & Rehydration Safety
+
+### Problem
+When a Product is rehydrated from the database (e.g., via JPA), the `Inventory` object may be `null` if:
+- The JPA query did not use `JOIN FETCH` for inventory.
+- The mapper did not create an Inventory object.
+- The database record has no associated inventory.
+
+This can cause `NullPointerException` when calling methods like `reserveStock()` or `getStock()`.
+
+### Solution
+The Product domain enforces that `inventory` is **never null**:
+
+``` java
+// Rehydration constructor with inventory parameter
+public Product(UUID id, String sku, String name, String description, BigDecimal price,
+               UUID categoryId, String imageURL, ProductStatus status,
+               LocalDateTime createdAt, LocalDateTime updatedAt,
+               Inventory inventory) {
+    // ...
+    this.inventory = inventory != null ? inventory : new Inventory(0, 0);
+
+```
+
+## Safety Methods
+- All inventory mutations trigger an internal verification before executing business logic to guarantee stability.
+
+```java
+private void ensureInventoryLoaded() {
+    if (this.inventory == null) {
+        this.inventory = new Inventory(0, 0);
+    }
+}
+``` 
+## Architectural Responsibilities
+
+- Domain (Product): Guarantees invariant self-containment; inventory is never null inside the aggregate boundary.
+- Infrastructure (ProductMapper): Converts JPA relationships into domain states, supplying either the mapped object or null safely.
+- Data Access (Repository): Eagerly fetches relationships whenever business operations require high transactional consistency.
+
+## State Rules & Preconditions
+
+- restock(amount): Requires amount > 0. Postcondition: quantity += amount.
+- reserveStock(amount): Requires amount > 0 and amount <= available. Postcondition: reservedQuantity += amount.
+- confirmReservation(amount): Requires amount > 0 and amount <= reserved. Postcondition: quantity -= amount and reservedQuantity -= amount.
+- releaseReservation(amount): Requires amount > 0 and amount <= reserved. Postcondition: reservedQuantity -= amount.
+- clearAllReservations(): No preconditions. Postcondition: reservedQuantity = 0.
+
 ## Concurrency Consideration (Infrastructure Layer)
 
 - Optimistic locking via @Version (future implementation).

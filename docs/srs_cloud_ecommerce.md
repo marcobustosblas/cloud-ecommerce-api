@@ -24,10 +24,12 @@ Este documento define los requisitos funcionales y no funcionales del sistema `c
 - **RF1.3** Filtros por categoría, rango de precio, texto.
 - **RF1.4** Subida de imágenes: presigned URL o carga directa al backend → **S3**.
 
-### RF2: Gestión de Stock
+### RF2: Gestión de Stock (Actualizado)
 - **RF2.1** Validación de stock al confirmar compra.
 - **RF2.2** Actualización atómica del inventario en transacción.
-- **RF2.3** Manejo de concurrencia (optimistic locking o equivalente).
+- **RF2.3** Manejo de concurrencia optimista utilizando `@Version` en la base de datos.
+- **RF2.4** La raíz agregada `Product` nunca debe exponer ni contener un campo `Inventory` nulo en memoria.
+- **RF2.5** Toda mutación interna del inventario debe gatillar una verificación diferida (`ensureInventoryLoaded`).
 
 ### RF3: Autenticación y Autorización
 - **RF3.1** Registro y login mediante email/password (BCrypt).
@@ -54,6 +56,18 @@ Este documento define los requisitos funcionales y no funcionales del sistema `c
 - **RF7.1** Actuator (`/actuator/health`, `/metrics`, `/info`).
 - **RF7.2** Logs estructurados.
 - **RF7.3** Dashboard básico (CloudWatch en prod).
+
+### RF8: Requisitos de Seguridad (NUEVO)
+- **RF8.1** Los tokens JWT emitidos tendrán un tiempo de expiración por defecto de 24 horas.
+- **RF8.2** Control de accesos basado en múltiples roles (`ADMIN`, `CUSTOMER`) por cuenta de usuario.
+- **RF8.3** Encriptación criptográfica unidireccional de contraseñas mediante hash BCrypt con factor de fuerza de trabajo de 10.
+- **RF8.4** Exposición pública sin token obligatoria para rutas de `/auth/**`, `/health/**` y `/swagger-ui/**`.
+- **RF8.5** Borrado lógico mandatorio de productos implementado mediante la anotación de infraestructura `@SoftDelete`.
+
+### RF9: Requisitos de Documentación (NUEVO)
+- **RF9.1** Exposición viva de contratos mediante especificación OpenAPI/Swagger en la ruta `/swagger-ui/**`.
+- **RF9.2** Mantenimiento continuo del archivo descentralizado `docs/domain_logic.md` para reglas puras.
+- **RF9.3** Registro histórico de decisiones arquitectónicas en `docs/architecture.md`.
 
 ## 4. Requisitos No Funcionales (RNF)
 
@@ -100,8 +114,16 @@ Este documento define los requisitos funcionales y no funcionales del sistema `c
 - **CA-04** Orden confirma, descuenta stock y envía evento asíncrono.
 - **CA-05** S3 almacena imágenes y la API expone URL accesible.
 - **CA-06** `/actuator/health` en **UP** en entorno local y prod.
+- **CA-07** **(Nuevo):** Ninguna consulta o carga parcial de entidades de persistencia puede provocar un error de referencia nula (`NPE`) al operar el dominio de inventario.
+- **CA-08** **(Nuevo):** La cobertura mínima de pruebas unitarias sobre el código fuente del dominio puro debe mantenerse mayor o igual al 70%.
 
-## 8. Roadmap de Entregas (resumen)
+## 8. Requisitos de Calidad de Código (NUEVO)
+- **RNF6.1** Cobertura automatizada mínima del 70% en lógicas del paquete raíz del dominio.
+- **RNF6.2** Cobertura automatizada mínima del 60% en servicios coordinadores de la capa de aplicación.
+- **RNF6.3** Bloqueo mandatorio en el pipeline de CI/CD si alguna prueba unitaria o de integración falla.
+- **RNF6.4** Descriptores de pruebas semánticos y legibles utilizando la anotación `@DisplayName`.
+
+## 9. Roadmap de Entregas (resumen)
 - Mes 1: CRUD + Docker + Postgres
 - Mes 2: Seguridad + Tests
 - Mes 3: S3 + Redis + Secrets

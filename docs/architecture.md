@@ -260,3 +260,66 @@ Este documento se actualizará con nuevas versiones conforme se agreguen módulo
 | **Soft Delete** | @SoftDelete en Product, User | Borrado lógico para conservar histórico |
 | **Idempotency** | idempotentKey en Order | Previene duplicados en operaciones críticas |
 | **Optimistic Locking** | @Version en Inventory, Order | Control de concurrencia sin bloqueos pesados |
+
+---
+
+# 13. Inventory Consistency in Domain Layer
+
+## Problem
+- `Product` and `Inventory` form a tightly coupled context where `Product` acts as the Aggregate Root.
+- When rehydrating a `Product` entity from the persistence layer, a missing relationship fetch can cause runtime exceptions if business logic runs against an uninitialized field.
+
+## Solution
+- The domain enforces structural integrity by initializing a default object when a null reference is passed to the constructor.
+- **New Product Creation:** Created natively with `new Inventory(initialQuantity, 0)`.
+- **Entity Rehydration:** `ProductMapper` converts `InventoryJpaEntity` into an `Inventory` domain object.
+- **Data Inconsistency Fallback:** Yields a safe `new Inventory(0, 0)` instance to block catastrophic failures.
+
+## Mapper Responsibility
+- The mapper is responsible for extracting the relational data and passing it down to the aggregate constructor.
+
+```java
+public Product toDomain(ProductJpaEntity entity) {
+    if (entity == null) return null;
+
+    Inventory domainInventory = null;
+    if (entity.getInventory() != null) {
+        domainInventory = inventoryMapper.toDomain(entity.getInventory());
+    }
+    
+    return new Product(
+        entity.getId(),
+        entity.getSku(),
+        entity.getName(),
+        entity.getDescription(),
+        entity.getPrice(),
+        entity.getCategory() != null ? entity.getCategory().getId() : null,
+        entity.getImageURL(),
+        entity.getStatus(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt(),
+        domainInventory
+    );
+}
+``` 
+
+---
+
+# 14. Error Handling Strategy
+
+## Domain Exception Matrix
+- **`IllegalArgumentException`:** Thrown on invalid data input constraints (null values, negative thresholds). Maps to `400 Bad Request`[cite: 1].
+- **`IllegalStateException`:** Thrown on breaking workflow transitions (mutating attributes outside DRAFT state). Maps to `422 Unprocessable Entity`[cite: 1].
+- **`DomainException`:** Thrown on violations of core domain business invariants. Maps to `409 Conflict`[cite: 1].
+
+## Global JSON Response Blueprint
+```json
+{
+  "timestamp": "2026-07-06T16:23:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Product name cannot be blank",
+  "path": "/api/products",
+  "details": ["Validation failed for field 'name'"]
+}
+``` 
