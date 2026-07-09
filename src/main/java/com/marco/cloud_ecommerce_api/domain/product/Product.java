@@ -77,7 +77,7 @@ public class Product {
     }
 
     // Method security para Inventory
-    // Asegura que inventory nunca sea null antes de operar.
+    // ASEGURA QUE inventory NUNCA SEA null ANTES DE OPERAR.
     private void ensureInventoryLoaded() {
         if (this.inventory == null) {
             this.inventory = new Inventory(0, 0);
