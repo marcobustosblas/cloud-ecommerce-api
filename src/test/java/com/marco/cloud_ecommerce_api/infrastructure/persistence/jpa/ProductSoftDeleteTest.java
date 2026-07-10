@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import static org.assertj.core.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @DataJpaTest
@@ -33,8 +34,15 @@ public class ProductSoftDeleteTest {
     @Test
     @DisplayName("Debe marcar el producto como borrado pero mantener el registro en la DB")
     void shouldSoftDeleteProduct() {
-
-        CategoryJpaEntity category = categoryRepository.save(new CategoryJpaEntity("Test Category"));
+        LocalDateTime now = LocalDateTime.now();
+        CategoryJpaEntity category = categoryRepository.save(new CategoryJpaEntity(
+                UUID.randomUUID(),
+                "Test Category",
+                "Description for soft delete test tracking",
+                true,
+                now,
+                now
+        ));
 
         ProductJpaEntity product = new ProductJpaEntity(
                 "SOFT-DELETE-SKU",
@@ -48,24 +56,19 @@ public class ProductSoftDeleteTest {
         product = productRepository.save(product);
         UUID productId = product.getId();
 
-        // verifico que el producto si está presente
         assertThat(productRepository.findById(productId)).isPresent();
 
-        // "Eliminar" (soft delete)
         productRepository.delete(product);
         productRepository.flush();
         entityManager.clear();
 
-        // Verificación del Repositorio (Hibernate filtra los que tienen active = false)
         assertThat(productRepository.findById(productId)).isEmpty();
 
-        // Verificación Base de Datos (SQL Nativo para saltar filtros)
         Object result = entityManager.getEntityManager()
                 .createNativeQuery("SELECT active FROM products WHERE id = :id")
                 .setParameter("id", productId)
                 .getSingleResult();
 
-        // active = false significa que está "soft deleted"
-        assertThat(result).isEqualTo(false); // false = inactivo, true = activo
+        assertThat(result).isEqualTo(false);
     }
 }

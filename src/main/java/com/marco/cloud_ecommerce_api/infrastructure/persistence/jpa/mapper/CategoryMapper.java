@@ -6,25 +6,34 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CategoryMapper {
+
+    // Base de Datos (JPA Entity) → Corazón de Negocio (Domain)
     public Category toDomain(CategoryJpaEntity entity) {
         if (entity == null) return null;
         return new Category(
                 entity.getId(),
                 entity.getName(),
+                entity.getDescription(),
                 entity.isActive(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
     }
+
+    // Corazón de Negocio (Domain) → Base de Datos (JPA Entity)
     public CategoryJpaEntity toJpaEntity(Category domain) {
         if (domain == null) return null;
 
-        // Siempre crear nueva entidad SIN ID (JPA lo generará)
-        // Cuando recupo de BD, el mapper de toDomain usó el constructor all-args
-        // Pero para guardar, siempre uso el constructor simple
-        CategoryJpaEntity entity = new CategoryJpaEntity(domain.getName());
-        entity.setActive(domain.isActive());
-        // No setteo createdAt/updatedAt porque @PrePersist los maneja
-        return entity;
+        // SOLUCIÓN: Paso absolutamente TODOS los datos mapeados desde el dominio.
+        // Al pasarle domain.getId(), Hibernate sabe perfectamente si debe hacer un INSERT (si es nuevo)
+        // o un UPDATE (si el ID ya existía en la base de datos).
+        return new CategoryJpaEntity(
+                domain.getId(),
+                domain.getName(),
+                domain.getDescription(),
+                domain.isActive(),
+                domain.getCreatedAt(),
+                domain.getUpdatedAt()
+        );
     }
 }

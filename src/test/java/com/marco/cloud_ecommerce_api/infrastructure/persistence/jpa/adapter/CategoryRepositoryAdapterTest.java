@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-@Transactional // Fundamental para evitar el error de "transaction" que vi antes
+@Transactional
 public class CategoryRepositoryAdapterTest {
 
     @Container
@@ -28,8 +28,8 @@ public class CategoryRepositoryAdapterTest {
 
     @Test
     void shouldSaveAndFindCategory() {
-        // 1. Preparar el dato
-        Category category = new Category("Test Category");
+        // 1. Preparar el dato con la nueva descripción obligatoria
+        Category category = new Category("Test Category", "Description for test category");
 
         // 2. Ejecutar la acción
         Category saved = categoryRepository.save(category);
@@ -41,11 +41,12 @@ public class CategoryRepositoryAdapterTest {
         var found = categoryRepository.findById(saved.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("Test Category");
+        assertThat(found.get().getDescription()).isEqualTo("Description for test category");
     }
 
     @Test
     void shouldFindCategoryByName() {
-        Category category = new Category("Clothing");
+        Category category = new Category("Clothing", "Apparel and fashion items");
         categoryRepository.save(category);
 
         Category found = categoryRepository.findByName("Clothing").orElse(null);
@@ -56,7 +57,7 @@ public class CategoryRepositoryAdapterTest {
 
     @Test
     void shouldCheckIfNameExists() {
-        Category category = new Category("Toys");
+        Category category = new Category("Toys", "Games and toys for children");
         categoryRepository.save(category);
 
         assertThat(categoryRepository.existsByName("Toys")).isTrue();
