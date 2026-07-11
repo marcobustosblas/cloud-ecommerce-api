@@ -55,7 +55,7 @@ public class ProductMapper {
                 domain.getStatus(),
                 category
         );
-        entity.setId(domain.getId());
+        entity.setId(domain.getProductId());
         entity.setActive(domain.isActive());
         return entity;
     }

@@ -10,7 +10,7 @@ public class ProductDtoMapper {
     public ProductResponseDTO toResponseDTO(Product product, String categoryName) {
         if (product == null) return null;
         return new ProductResponseDTO(
-                product.getId(),
+                product.getProductId(),
                 product.getSku(),
                 product.getName(),
                 product.getDescription(),

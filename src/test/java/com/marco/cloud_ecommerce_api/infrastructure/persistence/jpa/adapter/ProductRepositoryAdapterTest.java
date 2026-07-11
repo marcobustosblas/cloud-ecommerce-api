@@ -66,7 +66,7 @@ public class ProductRepositoryAdapterTest {
         product.activate();
 
         Product saved = productRepository.save(product);
-        Product found = productRepository.findById(saved.getId()).orElse(null);
+        Product found = productRepository.findById(saved.getProductId()).orElse(null);
 
         assertThat(found).isNotNull();
         assertThat(found.getSku()).isEqualTo("TEST-SKU-001");

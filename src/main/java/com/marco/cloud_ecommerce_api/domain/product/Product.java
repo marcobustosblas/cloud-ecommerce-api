@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Product {
-    private UUID id;
+    private UUID productId;
     private String sku;
     private String name;
     private String description;
@@ -24,7 +24,7 @@ public class Product {
             UUID categoryId, String imageURL, int initialQuantity
     ) {
         // 1. Identidad
-        this.id = UUID.randomUUID();
+        this.productId = UUID.randomUUID();
 
         // 2. Validaciones de entrada (Fail Fast)
         if (sku == null || sku.isBlank())
@@ -48,7 +48,7 @@ public class Product {
 
         // 4. Estado inicial y Composición
         this.status = ProductStatus.DRAFT;
-        this.inventory = new Inventory(initialQuantity, 0);
+        this.inventory = new Inventory(this.productId, 0);
 
         // 5. Auditoría
         this.createdAt = LocalDateTime.now();
@@ -63,7 +63,7 @@ public class Product {
                    UUID categoryId, String imageURL, ProductStatus status,
                    LocalDateTime createdAt, LocalDateTime updatedAt,
                    Inventory inventory) {
-        this.id = id;
+        this.productId = id;
         this.sku = sku;
         this.name = name;
         this.description = description;
@@ -73,14 +73,14 @@ public class Product {
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.inventory = inventory != null ? this.inventory : new Inventory(0,0);
+        this.inventory = inventory != null ? this.inventory : new Inventory(this.productId,0);
     }
 
     // Method security para Inventory
     // ASEGURA QUE inventory NUNCA SEA null ANTES DE OPERAR.
     private void ensureInventoryLoaded() {
         if (this.inventory == null) {
-            this.inventory = new Inventory(0, 0);
+            this.inventory = new Inventory(this.productId, 0);
         }
     }
 
@@ -249,8 +249,8 @@ public class Product {
 
     // Getters
 
-    public UUID getId() {
-        return id;
+    public UUID getProductId() {
+        return productId;
     }
 
     public String getSku() {
@@ -297,12 +297,12 @@ public class Product {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Product product)) return false;
-        return id != null && id.equals(product.id);
+        return productId != null && productId.equals(product.productId);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return productId != null ? productId.hashCode() : 0;
     }
 
 }
