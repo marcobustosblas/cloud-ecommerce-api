@@ -15,33 +15,38 @@ import org.springframework.stereotype.Component;
 public class InventoryMapper {
 
     /**
-     * Convierte InventoryJpaEntity a Inventory (domain).
-     *
-     * @param entity La entidad JPA de Inventory
-     * @return Inventory del dominio
+     * Convierte InventoryJpaEntity (BD) a Inventory (Dominio).
+     * Rehidratación completa con todas las invariantes.
      */
     public Inventory toDomain(InventoryJpaEntity entity) {
         if (entity == null) return null;
 
         return new Inventory(
+                entity.getInventoryId(),
+                entity.getProduct() != null ? entity.getProduct().getId() : null,
                 entity.getQuantity(),
-                entity.getReservedQuantity()
+                entity.getReservedQuantity(),
+                entity.getLastUpdated()
         );
     }
 
     /**
-     * Convierte Inventory (domain) a InventoryJpaEntity.
-     *
-     * @param domain El Inventory del dominio
-     * @return Entidad JPA de Inventory
+     * Convierte Inventory (Dominio) a InventoryJpaEntity (Infraestructura).
+     * Mantiene los IDs para que Hibernate sepa si hace INSERT o UPDATE.
      */
     public InventoryJpaEntity toJpaEntity(Inventory domain) {
         if (domain == null) return null;
 
         InventoryJpaEntity entity = new InventoryJpaEntity();
+
+        entity.setInventoryId(domain.getId());
         entity.setQuantity(domain.getQuantity());
         entity.setReservedQuantity(domain.getReservedQuantity());
+        entity.setLastUpdated(domain.getLastUpdated());
         // version se maneja automáticamente en JPA
+
+        // Nota: El enlace del objeto ProductJpaEntity completo se suele manejar
+        // en el ProductMapper, ya que el Inventario forma parte de su agregado.
 
         return entity;
     }

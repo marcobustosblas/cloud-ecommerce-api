@@ -76,7 +76,7 @@ public class InventoryConcurrencyTest {
             inventory.setVersion(0L);
             inventory.setProduct(savedProduct);
 
-            return inventoryRepository.save(inventory).getId();
+            return inventoryRepository.save(inventory).getInventoryId();
         });
     }
 

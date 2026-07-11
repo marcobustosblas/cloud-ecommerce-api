@@ -3,6 +3,7 @@ package com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity;
 import com.marco.cloud_ecommerce_api.domain.product.Inventory;
 import com.marco.cloud_ecommerce_api.domain.product.ProductStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SoftDeleteType;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,12 +14,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "products")
 @SoftDelete(columnName = "active", strategy = SoftDeleteType.ACTIVE)
 @EntityListeners(AuditingEntityListener.class)
 public class ProductJpaEntity {
 
+    // Getters
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -116,20 +119,6 @@ public class ProductJpaEntity {
             inventory.setProduct(this);
         }
     }
-
-    // Getters
-    public UUID getId() { return id; }
-    public String getSku() { return sku; }
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public BigDecimal getPrice() { return price; }
-    public String getImageURL() { return imageURL; }
-    public CategoryJpaEntity getCategory() { return category; }
-    public ProductStatus getStatus() { return status; }
-    public InventoryJpaEntity getInventory() { return inventory; }
-    public LocalDateTime getDeactivatedAt() { return deactivatedAt; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     // Setters
     public void setId(UUID id) { this.id = id; }

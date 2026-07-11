@@ -3,6 +3,7 @@ package com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.mapper;
 import com.marco.cloud_ecommerce_api.domain.product.Inventory;
 import com.marco.cloud_ecommerce_api.domain.product.Product;
 import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity.CategoryJpaEntity;
+import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity.InventoryJpaEntity;
 import com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity.ProductJpaEntity;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,6 @@ public class ProductMapper {
                 entity.getName(),
                 entity.getDescription(),
                 entity.getPrice(),
-                //entity.getCategory().getId(),
                 entity.getCategory() != null ? entity.getCategory().getId() : null,
                 // Evita NullPointerException. Solo el ID de la categoría
                 entity.getImageURL(),
@@ -55,8 +55,14 @@ public class ProductMapper {
                 domain.getStatus(),
                 category
         );
-        entity.setId(domain.getProductId());
+        entity.setId(domain.getId());
         entity.setActive(domain.isActive());
+
+        // Convierto el inventario del dominio a JPA y los enlazo de forma bidireccional
+        if (domain.getInventory() != null) {
+            InventoryJpaEntity inventoryEntity = inventoryMapper.toJpaEntity(domain.getInventory());
+            entity.setInventory(inventoryEntity);
+        }
         return entity;
     }
 }

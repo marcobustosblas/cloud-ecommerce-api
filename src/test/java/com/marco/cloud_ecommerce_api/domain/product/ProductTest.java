@@ -19,8 +19,14 @@ public class ProductTest {
     void shouldBeEqual_whenProductsHaveSameId() {
         UUID sharedId = UUID.randomUUID();
 
-        Product product1 = new Product(sharedId, "SKU-1", "Prod 1", "Desc", new BigDecimal("10"), UUID.randomUUID(), "url", ProductStatus.DRAFT, LocalDateTime.now(), LocalDateTime.now(), new Inventory(5, 0));
-        Product product2 = new Product(sharedId, "SKU-2", "Prod 2", "Desc", new BigDecimal("20"), UUID.randomUUID(), "url", ProductStatus.DRAFT, LocalDateTime.now(), LocalDateTime.now(), new Inventory(10, 0));
+        Product product1 = new Product(sharedId, "SKU-1", "Prod 1",
+                "Desc", new BigDecimal("10"), UUID.randomUUID(),
+                "url", ProductStatus.DRAFT, LocalDateTime.now(), LocalDateTime.now(),
+                new Inventory(UUID.randomUUID(), 0));
+        Product product2 = new Product(sharedId, "SKU-2", "Prod 2",
+                "Desc", new BigDecimal("20"), UUID.randomUUID(),
+                "url", ProductStatus.DRAFT, LocalDateTime.now(), LocalDateTime.now(),
+                new Inventory(UUID.randomUUID(), 0));
 
         assertEquals(product1, product2);
         assertEquals(product1.hashCode(), product2.hashCode());
