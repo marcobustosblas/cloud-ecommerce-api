@@ -223,5 +223,4 @@ public class OrderTest {
         assertFalse(order.canBePaid());
         assertFalse(order.canBeCancelled());
     }
-
 }
