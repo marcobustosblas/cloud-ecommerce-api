@@ -97,7 +97,10 @@ public class Order {
 
     public BigDecimal getTotal() {
         return items.stream()
-                .map(OrderItem::getSubtotal)
+                .map(item -> {
+                    BigDecimal subtotal = item.getSubtotal();
+                    return subtotal != null ? subtotal : BigDecimal.ZERO;
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

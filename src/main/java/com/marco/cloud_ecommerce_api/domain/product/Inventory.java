@@ -31,6 +31,7 @@ public class Inventory {
         if (reservedQuantity > quantity)
             throw new IllegalArgumentException("Reserved quantity [" + reservedQuantity + "] cannot exceed total quantity [" + quantity + "]");
         this.id = id;
+        this.productId = productId;
         this.quantity = quantity;
         this.reservedQuantity = reservedQuantity;
         this.lastUpdated = lastUpdated;
@@ -106,10 +107,6 @@ public class Inventory {
         if (reservedQuantity > quantity) throw new IllegalStateException("Data corruption: reserved exceeds total");
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
     // --- IDENTITY (Fundamental para JPA) ---
 
     @Override
@@ -130,6 +127,9 @@ public class Inventory {
     public UUID getProductId() {return productId; }
     public int getQuantity() { return quantity; }
     public int getReservedQuantity() { return reservedQuantity; }
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
 
     // Nota: No pongo Setters indiscriminados para proteger la integridad del objeto.
     // Los cambios se hacen a través de métodos de negocio como deductStock.
