@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +28,8 @@ public class OrderTest {
         OrderItem item = new OrderItem(productId, "Zapatos", 3, defaultPrice);
         defaultItems = List.of(item);
     }
+
+    // TESTS DE ORDER ITEM
 
     @Test
     @DisplayName("Debe crear un ítem de orden con datos válidos")
@@ -53,6 +56,8 @@ public class OrderTest {
         });
     }
 
+    // TESTS DE CREACIÓN Y LÓGICA DE NEGOCIO (BIRTH)
+
     @Test
     @DisplayName("Toda orden nueva debe nacer en estado PENDING")
     void shouldCreateOrderWithPendingStatus() {
@@ -75,6 +80,19 @@ public class OrderTest {
     }
 
     @Test
+    @DisplayName("Debe proteger la lista de ítems contra modificaciones externas")
+    void shouldReturnImmutableListOfItems() {
+        Order order = new Order(userId, defaultItems, idempotentKey);
+        List<OrderItem> items = order.getItems();
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            items.add(new OrderItem(UUID.randomUUID(), "OrderColao", 3, defaultPrice));
+        });
+    }
+
+    // TESTS DE TRANSICIONES DE ESTADO
+
+    @Test
     @DisplayName("Debe permitir pagar una orden que está pendiente")
     void shouldTransitionToPaidStatus() {
         Order order = new Order(userId, defaultItems, idempotentKey);
@@ -84,6 +102,7 @@ public class OrderTest {
     }
 
     @Test
+    @DisplayName("Debe permitir cancelar una orden que está pendiente")
     void shouldTransitionToCancelledStatus() {
         Order order = new Order(userId, defaultItems, idempotentKey);
         order.cancel();
@@ -92,7 +111,7 @@ public class OrderTest {
     }
 
     @Test
-    @DisplayName("No debe permitir pagar una orden que ya fue pagada (Idempotencia de estado)")
+    @DisplayName("NO DEBE permitir pagar una orden que ya fue pagada (Idempotencia de estado)")
     void shouldFailToPayWhenStatusIsNotPending() {
         Order order = new Order(userId, defaultItems, idempotentKey);
         order.pay();
@@ -101,16 +120,90 @@ public class OrderTest {
     }
 
     @Test
-    @DisplayName("Debe proteger la lista de ítems contra modificaciones externas")
-    void shouldReturnImmutableListOfItems() {
+    @DisplayName("Debe indicar correctamente si una orden puede o no ejecutarse")
+    void shouldIndicatePendingOrderQueries() {
         Order order = new Order(userId, defaultItems, idempotentKey);
 
-        List<OrderItem> items = order.getItems();
+        assertTrue(order.canBePaid());
+        assertTrue(order.canBeCancelled());
 
-        assertThrows(UnsupportedOperationException.class, () -> {
-            items.add(new OrderItem(UUID.randomUUID(), "OrderColado", 3, defaultPrice));
-        });
+        order.pay();
+
+        assertFalse(order.canBePaid());
+        assertFalse(order.canBeCancelled());
     }
+
+    // TESTS DE CONSTRUCTOR DE RECONSTRUCCIÓN (INFRAESTRUCTURA)
+
+    @Test
+    @DisplayName("Debe rehidratar una orden desde la BD con todos sus datos")
+    void shouldReconstructOrderFromDatabase() {
+        UUID orderId = UUID.randomUUID();
+        UUID rUserId = UUID.randomUUID();
+        List<OrderItem> items = List.of(
+                new OrderItem(UUID.randomUUID(), "Producto", 2, new BigDecimal("50.00"))
+        );
+        LocalDateTime pastDate = LocalDateTime.now().minusDays(3);
+        Long version = 5L;
+        String reconKey = "recon-key-123";
+
+        Order order = new Order(orderId, rUserId, OrderStatus.PAID, items, pastDate, reconKey, version);
+
+        assertEquals(orderId, order.getId());
+        assertEquals(rUserId, order.getUserId());
+        assertEquals(OrderStatus.PAID, order.getStatus());
+        assertEquals(pastDate, order.getCreatedAt());
+        assertEquals(version, order.getVersion());
+        assertEquals(reconKey, order.getIdempotentKey());
+        assertEquals(new BigDecimal("100.00"), order.getTotal());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si faltan parámetros obligatorios en reconstrucción")
+    void shouldThrowExceptionWhenReconstructionDataIsInvalid() {
+        UUID orderId = UUID.randomUUID();
+        List<OrderItem> items = List.of(new OrderItem(UUID.randomUUID(), "Producto", 1, new BigDecimal("10.00")));
+        LocalDateTime pastDate = LocalDateTime.now().minusDays(1);
+
+        // 1. Validar versión nula
+        assertThrows(IllegalArgumentException.class,
+                () -> new Order(orderId, userId, OrderStatus.PENDING, items, pastDate, "key", null));
+        // 2. Validar ID nulo
+        assertThrows(IllegalArgumentException.class,
+                () -> new Order(null, userId, OrderStatus.PENDING, items, pastDate, "key", 1L));
+        // 3. Validar Items nulos
+        assertThrows(IllegalArgumentException.class,
+                () -> new Order(orderId, userId, OrderStatus.PENDING, null, pastDate, "key", 1L));
+    }
+
+    // TESTS DE EQUALS / HASHCODE
+
+    @Test
+    @DisplayName("Dos órdenes con el mismo ID deben ser iguales independientemente del estado")
+    void shouldBeEqualWhenSameId() {
+        UUID sharedId = UUID.randomUUID();
+        List<OrderItem> items = List.of(new OrderItem(UUID.randomUUID(), "Product", 1, new BigDecimal("10.00")));
+        LocalDateTime now = LocalDateTime.now();
+
+        Order order1 = new Order(sharedId, userId, OrderStatus.PENDING, items, now, "key-1", 1L);
+        Order order2 = new Order(sharedId, userId, OrderStatus.PAID, items, now, "key-2", 2L);
+
+        assertEquals(order1, order2);
+        assertEquals(order1.hashCode(), order2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Dos órdenes con ID diferente deben ser diferentes")
+    void shouldNotBeEqual_whenDifferentId() {
+        List<OrderItem> items = List.of(new OrderItem(UUID.randomUUID(), "Producto", 1, new BigDecimal("10.00")));
+        LocalDateTime now = LocalDateTime.now();
+
+        Order order1 = new Order(UUID.randomUUID(), userId, OrderStatus.PENDING, items, now, "key-1", 1L);
+        Order order2 = new Order(UUID.randomUUID(), userId, OrderStatus.PENDING, items, now, "key-2", 1L);
+
+        assertNotEquals(order1, order2);
+    }
+
 
     @Test
     @DisplayName("Debe indicar que una orden pendiente puede ser pagada")
@@ -130,5 +223,4 @@ public class OrderTest {
         assertFalse(order.canBePaid());
         assertFalse(order.canBeCancelled());
     }
-
 }

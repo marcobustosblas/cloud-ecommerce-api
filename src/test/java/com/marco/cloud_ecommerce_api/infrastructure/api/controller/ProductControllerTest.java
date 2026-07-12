@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,18 +41,24 @@ public class ProductControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Inicializo MockMvc manualmente inyectando el resolvedor de Pageable de Spring Data
-        // Esto soluciona CUALQUIER error 400 relacionado con parámetros de paginación en los tests
         this.mockMvc = MockMvcBuilders.standaloneSetup(productController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
 
-        // 1. Limpieza
+        // 1. Limpieza radical
         productJpaRepository.deleteAll();
         categoryJpaRepository.deleteAll();
 
-        // 2. Crear categoría
-        CategoryJpaEntity category = new CategoryJpaEntity("Tecnología");
+        // 2. Crear categoría usando el constructor All-Args corregido
+        LocalDateTime now = LocalDateTime.now();
+        CategoryJpaEntity category = new CategoryJpaEntity(
+                UUID.randomUUID(),
+                "Tecnología",
+                "Dispositivos tecnológicos y gadgets",
+                true,
+                now,
+                now
+        );
         category = categoryJpaRepository.save(category);
 
         // 3. Crear Producto 1
@@ -86,7 +94,7 @@ public class ProductControllerTest {
         mockMvc.perform(get("/api/products")
                         .param("page", "0")
                         .param("size", "10")
-                        .param("sort", "name,asc") // Formato directo perfecto
+                        .param("sort", "name,asc")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pageNumber").value(0))

@@ -13,4 +13,8 @@ public class CategoryRequestDTO {
     @Size(min = 2, max = 100, message = "Category name must be between 2 and 100 characters")
     private String name;
 
+    @NotBlank(message = "Category description is required")
+    @Size(min = 10, max = 255, message = "Category description must be between 10 and 255 characters")
+    private String description;
+
 }

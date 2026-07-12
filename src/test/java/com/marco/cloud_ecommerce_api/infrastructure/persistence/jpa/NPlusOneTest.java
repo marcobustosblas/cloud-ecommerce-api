@@ -18,7 +18,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -44,10 +46,18 @@ public class NPlusOneTest {
     @Test
     @DisplayName("Demostrar el problema N+1")
     void demonstrateNPlusOneProblem() {
+        LocalDateTime now = LocalDateTime.now();
 
-        // Creo 5 categorías y 5 productos (uno por categoría)
+        // Creo 5 categorías y 5 productos usando el constructor completo
         for (int i = 0; i < 5; i++) {
-            CategoryJpaEntity cat = categoryRepository.save(new CategoryJpaEntity("Cat" + i));
+            CategoryJpaEntity cat = categoryRepository.save(new CategoryJpaEntity(
+                    UUID.randomUUID(),
+                    "Cat" + i,
+                    "Description for generic category " + i,
+                    true,
+                    now,
+                    now
+            ));
 
             ProductJpaEntity product = new ProductJpaEntity(
                     "SKU-" + i,
@@ -66,7 +76,6 @@ public class NPlusOneTest {
         entityManager.clear();
 
         System.out.println("\n=== [INICIO] EJECUTANDO CONSULTA findAll() ===");
-        // Genera el "1"
         List<ProductJpaEntity> products = productRepository.findAll();
 
         System.out.println("\n=== [PASO] ACCEDIENDO A LAS CATEGORÍAS (Disparador de N) ===");
@@ -78,5 +87,4 @@ public class NPlusOneTest {
 
         assertThat(products).hasSize(5);
     }
-
 }

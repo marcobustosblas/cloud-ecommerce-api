@@ -1,17 +1,22 @@
 package com.marco.cloud_ecommerce_api.infrastructure.persistence.jpa.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "inventory")
 public class InventoryJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Column(name = "inventory_id")
+    private UUID inventoryId;
 
     @Column(nullable = false)
     private int quantity;
@@ -32,7 +37,7 @@ public class InventoryJpaEntity {
     public InventoryJpaEntity() {}
 
     public InventoryJpaEntity(UUID id, int quantity, int reservedQuantity, LocalDateTime lastUpdated) {
-        this.id = id;
+        this.inventoryId = id;
         this.quantity = quantity;
         this.reservedQuantity = reservedQuantity;
         this.lastUpdated = lastUpdated;
@@ -42,60 +47,12 @@ public class InventoryJpaEntity {
     // se añade la version para el bloqueo optimista y la relación con el product
     public InventoryJpaEntity(UUID id, int quantity, int reserved_quantity,
                               Long version, LocalDateTime lastUpdated, ProductJpaEntity product) {
-        this.id = id;
+        this.inventoryId = id;
         this.quantity = quantity;
         this.reservedQuantity = reserved_quantity;
         this.version = version;
         this.lastUpdated = lastUpdated;
         this.product = product;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public int getReservedQuantity() {
-        return reservedQuantity;
-    }
-
-    public void setReservedQuantity(int reservedQuantity) {
-        this.reservedQuantity = reservedQuantity;
-    }
-
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
-    public ProductJpaEntity getProduct() {
-        return product;
-    }
-
-    public void setProduct(ProductJpaEntity product) {
-        this.product = product;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 
     @PreUpdate

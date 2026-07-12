@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public class Inventory {
     private UUID id;
+    private UUID productId;
     private int quantity;
     private int reservedQuantity;
     private LocalDateTime lastUpdated;
@@ -16,22 +17,24 @@ public class Inventory {
     }
 
     // Constructor para crear cosas nuevas
-    public Inventory(int quantity, int reservedQuantity) {
-        this(UUID.randomUUID(), quantity, reservedQuantity);
+    public Inventory(UUID productId, int quantity) {
+        this(UUID.randomUUID(), productId, quantity, 0, LocalDateTime.now());
     }
 
     // Constructor Completo (El que usará JPA mañana)
-    public Inventory(UUID id, int quantity, int reservedQuantity) {
+    public Inventory(UUID id, UUID productId, int quantity, int reservedQuantity, LocalDateTime lastUpdated) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
+        if (productId == null) throw new IllegalArgumentException("Product ID cannot be null");
         validateQuantity(quantity);
         if (reservedQuantity < 0)
             throw new IllegalArgumentException("Reserved quantity cannot be negative");
         if (reservedQuantity > quantity)
             throw new IllegalArgumentException("Reserved quantity [" + reservedQuantity + "] cannot exceed total quantity [" + quantity + "]");
         this.id = id;
+        this.productId = productId;
         this.quantity = quantity;
         this.reservedQuantity = reservedQuantity;
-        this.lastUpdated = LocalDateTime.now();
+        this.lastUpdated = lastUpdated;
     }
 
     // Validaciones para el constructor:
@@ -104,10 +107,6 @@ public class Inventory {
         if (reservedQuantity > quantity) throw new IllegalStateException("Data corruption: reserved exceeds total");
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
     // --- IDENTITY (Fundamental para JPA) ---
 
     @Override
@@ -125,8 +124,12 @@ public class Inventory {
 
     // 3. Getters (Para que otras capas puedan leer los datos)
     public UUID getId() { return id; }
+    public UUID getProductId() {return productId; }
     public int getQuantity() { return quantity; }
     public int getReservedQuantity() { return reservedQuantity; }
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
 
     // Nota: No pongo Setters indiscriminados para proteger la integridad del objeto.
     // Los cambios se hacen a través de métodos de negocio como deductStock.

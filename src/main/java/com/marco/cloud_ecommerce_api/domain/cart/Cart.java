@@ -71,7 +71,12 @@ public class Cart {
         if (productId == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
-        if (quantity <= 0) {
+        // 1. Bloqueo estricto para proteger los subtotales de negocio
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+        // 2. Comportamiento comercial: cero remueve el producto
+        if (quantity == 0) {
             removeItem(productId);
             return;
         }

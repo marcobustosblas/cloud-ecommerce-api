@@ -48,16 +48,21 @@ public class Product {
 
         // 4. Estado inicial y Composición
         this.status = ProductStatus.DRAFT;
-        this.inventory = new Inventory(initialQuantity, 0);
+        this.inventory = new Inventory(this.id, 0);
 
         // 5. Auditoría
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
     }
 
+    /**
+     * Constructor para REHIDRATACIÓN desde base de datos.
+     * AHORA RECIBE Inventory como parámetro (nunca es null).
+     */
     public Product(UUID id, String sku, String name, String description, BigDecimal price,
                    UUID categoryId, String imageURL, ProductStatus status,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+                   LocalDateTime createdAt, LocalDateTime updatedAt,
+                   Inventory inventory) {
         this.id = id;
         this.sku = sku;
         this.name = name;
@@ -68,7 +73,15 @@ public class Product {
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.inventory = null; // se asigna aparte si es necesario
+        this.inventory = inventory != null ? this.inventory : new Inventory(this.id,0);
+    }
+
+    // Method security para Inventory
+    // ASEGURA QUE inventory NUNCA SEA null ANTES DE OPERAR.
+    private void ensureInventoryLoaded() {
+        if (this.inventory == null) {
+            this.inventory = new Inventory(this.id, 0);
+        }
     }
 
     // 1 METHODS
@@ -157,6 +170,7 @@ public class Product {
         if (this.status != ProductStatus.ACTIVE) {
             throw new IllegalStateException("Only ACTIVE products can be deactivated");
         }
+        ensureInventoryLoaded();
         if (this.inventory.getReservedQuantity() > 0) {
             throw new IllegalStateException("Cannot deactivate product with active reservations");
         }
@@ -164,37 +178,47 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // 1.1.3 Operaciones de negocio (inventory)
+    // 1.1.3 Operaciones de inventory (delegadas a él)
 
     // METHOD PARA DEVOLVER STOCK
     public void restock(int amount) {
         ensureActivate();
+        ensureInventoryLoaded();
         this.inventory.restock(amount);
         this.updatedAt = LocalDateTime.now();
     }
 
     public void reserveStock(int amount) {
         ensureActivate();
+        ensureInventoryLoaded();
         this.inventory.reserveStock(amount);
         this.updatedAt = LocalDateTime.now();
     }
 
     public void confirmOrder(int amount) {
         ensureActivate();
+        ensureInventoryLoaded();
         this.inventory.confirmReservation(amount);
         this.updatedAt = LocalDateTime.now();
     }
 
     public void releaseReservation(int amount) {
         ensureActivate();
+        ensureInventoryLoaded();
         this.inventory.releaseReservation(amount);
         this.updatedAt = LocalDateTime.now();
     }
 
-    // METHOD PARA REDUCIR STOCK (cuando se compra)
+    /**
+     * Method helper para reducir stock en una compra.
+     * Combina reserveStock + confirmOrder en una sola operación.
+     */
     public void reduceStock(int quantity) {
+        ensureActivate();
+        ensureInventoryLoaded();
         this.inventory.reserveStock(quantity); // primero reservo
-        this.confirmOrder(quantity); // luego confirmo
+        this.inventory.confirmReservation(quantity); // luego confirmo
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void ensureActivate() {
@@ -215,6 +239,7 @@ public class Product {
     }
 
     public boolean hasStock(int requested) {
+        ensureInventoryLoaded();
         return this.inventory.hasAvailableStock(requested);
     }
 
@@ -255,6 +280,8 @@ public class Product {
     public ProductStatus getStatus() {
         return status;
     }
+
+    public Inventory getInventory() { return inventory; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

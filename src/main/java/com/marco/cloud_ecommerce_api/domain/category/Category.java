@@ -7,25 +7,29 @@ import java.util.UUID;
 public class Category {
     private final UUID id;
     private String name;
+    private String description;
     private boolean active;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     // Constructor para nueva categoría
-    public Category(String name) {
+    public Category(String name, String description) {
         validateName(name);
+        validateDescription(description);
         this.id = UUID.randomUUID();
         this.name = name;
+        this.description = description;
         this.active = true;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
     }
 
     // Constructor RECONSTRUCTION (desde BD)
-    public Category(UUID id, String name, boolean active,
+    public Category(UUID id, String name, String description, boolean active,
                     LocalDateTime createdAt, LocalDateTime updatedAt) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
         validateName(name);
+        validateDescription(description);
         Objects.requireNonNull(createdAt, "createdAt cannot be null");
         Objects.requireNonNull(updatedAt, "updatedAt cannot be null");
         this.id = id;
@@ -40,6 +44,18 @@ public class Category {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name cannot be null or blank");
         }
+    }
+
+    private void validateDescription(String description) {
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("Description cannot be null or blank");
+        }
+    }
+
+    public void updateDescription(String newDescription) {
+        validateDescription(newDescription);
+        this.description = newDescription;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void rename(String newName) {
@@ -60,6 +76,7 @@ public class Category {
 
     public UUID getId() {return this.id;}
     public String getName() {return this.name;}
+    public String getDescription() { return this.description; }
     public boolean isActive() {return this.active;}
     public LocalDateTime getCreatedAt() {return this.createdAt;}
     public LocalDateTime getUpdatedAt() {return this.updatedAt;}

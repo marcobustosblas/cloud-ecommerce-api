@@ -1,6 +1,7 @@
 package com.marco.cloud_ecommerce_api.domain.cart;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -109,6 +110,46 @@ public class CartTest {
         Cart cart2 = new Cart(cartId, userId, new ArrayList<>());
 
         assertEquals(cart1, cart2);
+    }
+
+    // VALIDACIONES EXTRA DE NEGOCIO
+
+    @Test
+    @DisplayName("Debe calcular el total acumulado correctamente cuando hay múltiples ítems")
+    void shouldCalculateTotalWithMultipleItems() {
+        // Arrange
+        cart.addItem(productId, "Zapatillas", 2, new BigDecimal("50.00")); // Subtotal: 100
+        UUID secondProductId = UUID.randomUUID();
+        cart.addItem(secondProductId, "Polera", 3, new BigDecimal("20.00"));   // Subtotal: 60
+
+        // Act & Assert
+        assertEquals(new BigDecimal("160.00"), cart.getTotal(), "El total del carrito debe ser la suma de todos los subtotales");
+        assertEquals(2, cart.getItems().size());
+    }
+
+    @Test
+    @DisplayName("Debe tolerar o manejar de forma segura el remover un producto que no existe en el carrito")
+    void shouldDoNothingWhenRemovingNonExistentProduct() {
+        // Arrange
+        cart.addItem(productId, "Zapatillas", 1, defaultPrice);
+        UUID nonExistentProductId = UUID.randomUUID();
+
+        // Act & Assert
+        assertDoesNotThrow(() -> cart.removeItem(nonExistentProductId),
+                "Remover un producto que no existe no debería lanzar ninguna excepción");
+        assertEquals(1, cart.getItems().size(), "El producto original debe seguir en el carrito");
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si se intenta actualizar la cantidad con un valor negativo")
+    void shouldThrowExceptionWhenUpdatingQuantityToNegative() {
+        // Arrange
+        cart.addItem(productId, "Zapatos", 2, defaultPrice);
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            cart.updateQuantity(productId, -3);
+        }, "El negocio no debe permitir stock o cantidades negativas en el carrito");
     }
 
 }

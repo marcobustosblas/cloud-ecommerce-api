@@ -17,6 +17,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @SpringBootTest
 @Testcontainers
@@ -35,9 +37,18 @@ public class ProductRepositoryAdapterTest {
 
     private CategoryJpaEntity testCategory;
 
+    LocalDateTime now = LocalDateTime.now();
+
     @BeforeEach
     void setUp() {
-        testCategory = new CategoryJpaEntity("Electronics");
+        testCategory = new CategoryJpaEntity(
+                UUID.randomUUID(),
+                "Electronic",
+                "All electronic devices",
+                true,
+                now,
+                now
+        );
         testCategory = categoryJpaRepository.save(testCategory);
     }
 
